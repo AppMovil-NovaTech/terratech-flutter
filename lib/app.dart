@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'core/network/dio_client.dart';
 import 'core/storage/secure_storage.dart';
+import 'features/community/presentation/screens/product_reviews_screen.dart';
 
 /// Named route constants for the application and its bounded contexts.
 abstract final class AppRoutes {
@@ -47,7 +48,33 @@ class TerraTechApp extends StatelessWidget {
       ),
       AppRoutes.community => MaterialPageRoute<void>(
         settings: settings,
-        builder: (_) => const _AppShellPlaceholder(title: 'Community Module'),
+        builder: (_) {
+          final args = settings.arguments;
+          if (args is CommunityScreenArgs) {
+            return ProductReviewsScreen(
+              productId: args.productId,
+              targetProfileId: args.targetProfileId,
+              currentUserId: args.currentUserId,
+              productOwnerUserId: args.productOwnerUserId,
+              dioClient: dioClient,
+            );
+          }
+          if (args is Map<String, dynamic>) {
+            return ProductReviewsScreen(
+              productId: (args['productId'] as num?)?.toInt() ?? 104,
+              targetProfileId: (args['targetProfileId'] as num?)?.toInt() ?? 2,
+              currentUserId: (args['currentUserId'] as num?)?.toInt() ?? 5,
+              productOwnerUserId: (args['productOwnerUserId'] as num?)?.toInt(),
+              dioClient: dioClient,
+            );
+          }
+          return ProductReviewsScreen(
+            productId: 104,
+            targetProfileId: 2,
+            currentUserId: 5,
+            dioClient: dioClient,
+          );
+        },
       ),
       _ => MaterialPageRoute<void>(
         settings: settings,
