@@ -8,7 +8,13 @@ final class EnvConfig {
   const EnvConfig._();
 
   /// Base URL for the backend API injected at compile time.
-  static const String apiBaseUrl = String.fromEnvironment('API_BASE_URL');
+  ///
+  /// Defaults to `http://localhost:5022/` for local development when not
+  /// explicitly overridden via `--dart-define=API_BASE_URL=...`.
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://localhost:5022/',
+  );
 
   /// Validates that all required compile-time environment variables are present.
   ///
