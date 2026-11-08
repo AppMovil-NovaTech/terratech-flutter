@@ -73,8 +73,8 @@ class ProductReviewsController extends ChangeNotifier {
 
   /// Changes the star filter [1..5] (or null for all) and reloads comments.
   Future<void> setRatingFilter(int? rating) async {
-    if (_state.selectedRatingFilter == rating) {
-      // Tapping the currently selected filter unselects it (returns to all)
+    if (rating == null || _state.selectedRatingFilter == rating) {
+      // Tapping "Todas" (null) or the currently selected filter returns to all
       _state = _state.copyWith(clearRatingFilter: true);
     } else {
       _state = _state.copyWith(selectedRatingFilter: rating);

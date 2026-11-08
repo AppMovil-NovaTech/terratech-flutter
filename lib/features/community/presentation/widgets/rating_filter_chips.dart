@@ -20,6 +20,11 @@ class RatingFilterChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final total = summary?.totalReviews ?? 0;
+    final availableStars = <int>[5, 4, 3, 2, 1].where((star) {
+      if (summary == null) return true;
+      final count = summary!.ratingBreakdown.countForRating(star);
+      return count > 0 || selectedRating == star;
+    }).toList();
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -33,9 +38,8 @@ class RatingFilterChips extends StatelessWidget {
             onTap: () => onSelected(null),
           ),
           const SizedBox(width: 8),
-          // 5 to 1 star chips
-          ...List.generate(5, (index) {
-            final star = 5 - index;
+          // Star chips with existing reviews
+          ...availableStars.map((star) {
             final count = summary?.ratingBreakdown.countForRating(star) ?? 0;
             return Padding(
               padding: const EdgeInsets.only(right: 8.0),

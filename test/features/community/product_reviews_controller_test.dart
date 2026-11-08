@@ -136,6 +136,13 @@ void main() {
       await controller.setRatingFilter(1);
       expect(controller.state.selectedRatingFilter, isNull);
       expect(controller.state.comments.length, 1);
+
+      // Selecting a star and then tapping "Todas" (null) resets filter to null
+      await controller.setRatingFilter(4);
+      expect(controller.state.selectedRatingFilter, 4);
+      await controller.setRatingFilter(null);
+      expect(controller.state.selectedRatingFilter, isNull);
+      expect(controller.state.comments.length, 1);
     });
 
     test('createReview() rejects content under 10 chars at domain level', () async {

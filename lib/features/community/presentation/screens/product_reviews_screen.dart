@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../commercial/data/commercial_remote_datasource.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../data/datasources/product_reviews_remote_data_source.dart';
 import '../../data/repositories/product_reviews_repository_impl.dart';
@@ -18,16 +19,18 @@ import '../widgets/review_input_bottom_sheet.dart';
 /// Screen arguments model for navigating to [ProductReviewsScreen].
 class CommunityScreenArgs {
   const CommunityScreenArgs({
-    this.productId = 104,
-    this.targetProfileId = 2,
-    this.currentUserId = 5,
+    this.productId = 1,
+    this.targetProfileId = 1,
+    this.currentUserId = MockAuthSession.testUserId,
     this.productOwnerUserId,
+    this.productName,
   });
 
   final int productId;
   final int targetProfileId;
   final int? currentUserId;
   final int? productOwnerUserId;
+  final String? productName;
 }
 
 /// Main presentation screen for Epic 11: Product Reviews, Ratings & Reputation (US33, US34, US35, US36).
@@ -35,9 +38,10 @@ class ProductReviewsScreen extends StatefulWidget {
   const ProductReviewsScreen({
     super.key,
     required this.productId,
-    this.targetProfileId = 2,
-    this.currentUserId = 5,
+    this.targetProfileId = 1,
+    this.currentUserId = MockAuthSession.testUserId,
     this.productOwnerUserId,
+    this.productName,
     this.controller,
     this.dioClient,
   });
@@ -46,6 +50,7 @@ class ProductReviewsScreen extends StatefulWidget {
   final int targetProfileId;
   final int? currentUserId;
   final int? productOwnerUserId;
+  final String? productName;
   final ProductReviewsController? controller;
   final DioClient? dioClient;
 
@@ -179,7 +184,24 @@ class _ProductReviewsScreenState extends State<ProductReviewsScreen> {
         return Scaffold(
           backgroundColor: const Color(0xFFF8FAFC),
           appBar: AppBar(
-            title: const Text('Opiniones y Reputación'),
+            title: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Opiniones y Reputación'),
+                if (widget.productName != null &&
+                    widget.productName!.trim().isNotEmpty)
+                  Text(
+                    widget.productName!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF64748B),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            ),
             centerTitle: true,
             backgroundColor: Colors.white,
             foregroundColor: const Color(0xFF1E293B),

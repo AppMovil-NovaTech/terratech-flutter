@@ -82,7 +82,7 @@ class RatingSummaryCard extends StatelessWidget {
                           : 0.0;
 
                       return InkWell(
-                        onTap: onRatingBarTap != null
+                        onTap: (onRatingBarTap != null && count > 0)
                             ? () => onRatingBarTap!(star)
                             : null,
                         borderRadius: BorderRadius.circular(4),
@@ -145,7 +145,7 @@ class RatingSummaryCard extends StatelessWidget {
                   border: Border.all(color: const Color(0xFFFFEBAA)),
                 ),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Icon(
                       Icons.warning_amber_rounded,
@@ -155,7 +155,7 @@ class RatingSummaryCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '⚠️ Producto con calificación menor a 3.0 estrellas. Te sugerimos revisar las sugerencias de los compradores.',
+                        'Producto con calificación menor a 3.0 estrellas. Te sugerimos revisar las sugerencias de los compradores.',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: const Color(0xFF856404),
                           fontWeight: FontWeight.w600,
