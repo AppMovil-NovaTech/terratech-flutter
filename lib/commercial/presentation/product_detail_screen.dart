@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/router/app_routes.dart';
+import '../data/commercial_remote_datasource.dart';
 import '../domain/commercial_repository.dart';
 import '../domain/product.dart';
 import '../domain/traceability.dart';
@@ -79,6 +81,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       builder: (_) => BlocProvider<ProductDetailBloc>.value(
         value: _detailBloc,
         child: ContactFarmerBottomSheet(product: product),
+      ),
+    );
+  }
+
+  void _openProductReviews(BuildContext context, Product product) {
+    Navigator.of(context).pushNamed(
+      AppRoutes.community,
+      arguments: CommunityScreenArgs(
+        productId: product.id,
+        targetProfileId: product.farmerProfileId,
+        currentUserId: MockAuthSession.testUserId,
+        productName: product.name,
       ),
     );
   }
@@ -288,6 +302,77 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     context,
                     product,
                     traceability,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SectionContainerCard(
+                  title: 'Opiniones y Reputación de Compradores',
+                  icon: Icons.reviews_outlined,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF8E1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFFFFE082),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                const Icon(
+                                  Icons.star_rounded,
+                                  color: Color(0xFFF9A825),
+                                  size: 22,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  product.averageRating.toStringAsFixed(1),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        color: const Color(0xFF5D4037),
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Basado en ${product.reviewCount} reseñas verificadas de compradores en la comunidad TerraTech.',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.tonalIcon(
+                          key: const Key('open_product_reviews_button'),
+                          onPressed: () =>
+                              _openProductReviews(context, product),
+                          icon: const Icon(Icons.rate_review_outlined),
+                          label: const Text('Ver opiniones y calificar'),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

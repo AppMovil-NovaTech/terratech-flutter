@@ -56,6 +56,7 @@ class _TerraTechAppState extends State<TerraTechApp> {
       onGenerateRoute: (settings) => AppRouter.onGenerateRoute(
         settings,
         commercialRepository: _commercialRepository,
+        dioClient: widget.dioClient,
       ),
     );
   }
