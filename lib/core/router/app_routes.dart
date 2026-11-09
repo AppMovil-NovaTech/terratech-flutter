@@ -5,6 +5,11 @@ import '../../commercial/domain/commercial_repository.dart';
 import '../../commercial/domain/product.dart';
 import '../../commercial/presentation/catalog_screen.dart';
 import '../../commercial/presentation/product_detail_screen.dart';
+import '../../features/community/presentation/screens/product_reviews_screen.dart';
+import '../network/dio_client.dart';
+
+export '../../features/community/presentation/screens/product_reviews_screen.dart'
+    show CommunityScreenArgs;
 
 /// Named route constants for the application and its bounded contexts.
 abstract final class AppRoutes {
@@ -30,6 +35,7 @@ abstract final class AppRouter {
   static Route<dynamic> onGenerateRoute(
     RouteSettings settings, {
     required CommercialRepository commercialRepository,
+    DioClient? dioClient,
   }) {
     return switch (settings.name) {
       AppRoutes.home => MaterialPageRoute<void>(
@@ -64,7 +70,37 @@ abstract final class AppRouter {
       ),
       AppRoutes.community => MaterialPageRoute<void>(
         settings: settings,
-        builder: (_) => const AppShellPlaceholder(title: 'Community Module'),
+        builder: (_) {
+          final args = settings.arguments;
+          if (args is CommunityScreenArgs) {
+            return ProductReviewsScreen(
+              productId: args.productId,
+              targetProfileId: args.targetProfileId,
+              currentUserId: args.currentUserId,
+              productOwnerUserId: args.productOwnerUserId,
+              productName: args.productName,
+              dioClient: dioClient,
+            );
+          }
+          if (args is Map<String, dynamic>) {
+            return ProductReviewsScreen(
+              productId: (args['productId'] as num?)?.toInt() ?? 1,
+              targetProfileId: (args['targetProfileId'] as num?)?.toInt() ?? 1,
+              currentUserId:
+                  (args['currentUserId'] as num?)?.toInt() ??
+                  MockAuthSession.testUserId,
+              productOwnerUserId: (args['productOwnerUserId'] as num?)?.toInt(),
+              productName: args['productName'] as String?,
+              dioClient: dioClient,
+            );
+          }
+          return ProductReviewsScreen(
+            productId: 1,
+            targetProfileId: 1,
+            currentUserId: MockAuthSession.testUserId,
+            dioClient: dioClient,
+          );
+        },
       ),
       _ => MaterialPageRoute<void>(
         settings: settings,
@@ -222,6 +258,7 @@ class TerraTechHomeShell extends StatelessWidget {
                 side: BorderSide(color: colorScheme.outlineVariant),
               ),
               child: ListTile(
+                key: const Key('home_navigate_community_card'),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 18,
                   vertical: 8,
