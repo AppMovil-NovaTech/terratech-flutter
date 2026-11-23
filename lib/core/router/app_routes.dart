@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../commercial/data/commercial_remote_datasource.dart';
+import '../../commercial/data/product_interest_auth_service.dart';
 import '../../commercial/domain/commercial_repository.dart';
 import '../../commercial/domain/product.dart';
 import '../../commercial/presentation/catalog_screen.dart';
 import '../../commercial/presentation/product_detail_screen.dart';
+import '../../commercial/presentation/product_interest_screen.dart';
 import '../../features/community/presentation/screens/product_reviews_screen.dart';
 import '../network/dio_client.dart';
+import '../storage/secure_storage.dart';
 
 export '../../features/community/presentation/screens/product_reviews_screen.dart'
     show CommunityScreenArgs;
@@ -16,15 +19,13 @@ abstract final class AppRoutes {
   static const String home = '/';
   static const String commercial = '/commercial';
   static const String productDetail = '/commercial/product-detail';
+  static const String productInterest = '/commercial/product-interest';
   static const String community = '/community';
 }
 
 /// Strongly-typed route arguments for navigating to [ProductDetailScreen].
 final class ProductDetailRouteArgs {
-  const ProductDetailRouteArgs({
-    required this.productId,
-    this.initialProduct,
-  });
+  const ProductDetailRouteArgs({required this.productId, this.initialProduct});
 
   final int productId;
   final Product? initialProduct;
@@ -36,6 +37,7 @@ abstract final class AppRouter {
     RouteSettings settings, {
     required CommercialRepository commercialRepository,
     DioClient? dioClient,
+    SecureStorage? secureStorage,
   }) {
     return switch (settings.name) {
       AppRoutes.home => MaterialPageRoute<void>(
@@ -67,6 +69,20 @@ abstract final class AppRouter {
             repository: commercialRepository,
           );
         },
+      ),
+      AppRoutes.productInterest => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => dioClient != null && secureStorage != null
+            ? ProductInterestScreen(
+                repository: commercialRepository,
+                authService: ProductInterestAuthService(
+                  dioClient: dioClient,
+                  secureStorage: secureStorage,
+                ),
+              )
+            : const AppShellPlaceholder(
+                title: 'Inicio de sesión no disponible',
+              ),
       ),
       AppRoutes.community => MaterialPageRoute<void>(
         settings: settings,
@@ -182,9 +198,8 @@ class TerraTechHomeShell extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               'Módulos Disponibles',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 12),
             Card(
@@ -223,9 +238,7 @@ class TerraTechHomeShell extends StatelessWidget {
                             Text(
                               'Catálogo de Productos y Trazabilidad',
                               style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                  ),
+                                  ?.copyWith(fontWeight: FontWeight.w800),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -247,6 +260,21 @@ class TerraTechHomeShell extends StatelessWidget {
                     ],
                   ),
                 ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Card(
+              child: ListTile(
+                key: const Key('home_navigate_product_interest_card'),
+                leading: const Icon(Icons.notifications_active_outlined),
+                title: const Text('Alertas de interés de productos'),
+                subtitle: const Text(
+                  'Consulta estadísticas y configura el umbral de tus productos.',
+                ),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                onTap: () {
+                  Navigator.of(context).pushNamed(AppRoutes.productInterest);
+                },
               ),
             ),
             const SizedBox(height: 12),
@@ -292,10 +320,7 @@ class TerraTechHomeShell extends StatelessWidget {
 
 /// Placeholder screen for bounded contexts pending implementation.
 class AppShellPlaceholder extends StatelessWidget {
-  const AppShellPlaceholder({
-    super.key,
-    required this.title,
-  });
+  const AppShellPlaceholder({super.key, required this.title});
 
   final String title;
 

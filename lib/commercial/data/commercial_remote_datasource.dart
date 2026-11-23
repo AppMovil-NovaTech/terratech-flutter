@@ -4,6 +4,7 @@ import '../../core/errors/problem_details.dart';
 import '../../core/network/dio_client.dart';
 import '../../core/storage/secure_storage.dart';
 import '../domain/product.dart';
+import '../domain/product_interest.dart';
 import 'product_model.dart';
 import 'traceability_model.dart';
 
@@ -30,15 +31,15 @@ abstract final class MockAuthSession {
       final existingToken = await secureStorage.getToken();
       if (existingToken == null || existingToken.trim().isEmpty) {
         await secureStorage.saveToken(staticJwtToken);
+        await secureStorage.write(
+          key: userEmailStorageKey,
+          value: testUserEmail,
+        );
+        await secureStorage.write(
+          key: userNameStorageKey,
+          value: testUserFullName,
+        );
       }
-      await secureStorage.write(
-        key: userEmailStorageKey,
-        value: testUserEmail,
-      );
-      await secureStorage.write(
-        key: userNameStorageKey,
-        value: testUserFullName,
-      );
     } catch (_) {
       // Ignore platform storage exceptions in headless/test environments.
     }
@@ -54,6 +55,15 @@ abstract interface class CommercialRemoteDataSource {
   /// Fetches a single product by [id] from `/api/v1/products/{id}` along with
   /// its complete traceability and cultivation practices.
   Future<ProductModel> getProductById(int id);
+
+  /// US29 product visits and owner interest operations.
+  Future<void> registerProductConsultation(int productId);
+  Future<ProductInterest> getProductInterest(int productId);
+  Future<ProductInterest> updateProductInterestThreshold(
+    int productId,
+    int threshold,
+  );
+  Future<void> checkProductInactivity(int productId);
 
   /// Fetches the authorized TerraTech traceability record for [productId].
   Future<TraceabilityModel> getProductTraceability(int productId);
@@ -87,7 +97,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
   @override
   Future<List<ProductModel>> getProducts() async {
     try {
-      final response = await _dio.get< dynamic>(productsEndpoint);
+      final response = await _dio.get<dynamic>(productsEndpoint);
       final rawList = _extractList(response.data);
 
       final contextData = await _loadAuthorizedContext();
@@ -196,6 +206,70 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
       sentAt: DateTime.now().toUtc(),
       notificationCreated: notificationCreated,
     );
+  }
+
+  /// US29: only the detail screen explicitly invokes this operation.
+  /// Product traceability reloads must not generate extra consultations.
+  @override
+  Future<void> registerProductConsultation(int productId) async {
+    try {
+      await _dio.post<void>('$productsEndpoint/$productId/consultations');
+    } on DioException catch (exception) {
+      throw _extractProblemDetails(exception);
+    }
+  }
+
+  @override
+  Future<ProductInterest> getProductInterest(int productId) async {
+    try {
+      final response = await _dio.get<dynamic>(
+        '$productsEndpoint/$productId/interest',
+      );
+      final data = _extractMap(response.data);
+      if (data == null) {
+        throw const ProblemDetails(
+          title: 'Estadísticas no disponibles',
+          status: 500,
+          detail: 'No se pudo leer el interés del producto.',
+        );
+      }
+      return ProductInterest.fromJson(data);
+    } on DioException catch (exception) {
+      throw _extractProblemDetails(exception);
+    }
+  }
+
+  @override
+  Future<ProductInterest> updateProductInterestThreshold(
+    int productId,
+    int threshold,
+  ) async {
+    try {
+      final response = await _dio.put<dynamic>(
+        '$productsEndpoint/$productId/interest-threshold',
+        data: <String, dynamic>{'threshold': threshold},
+      );
+      final data = _extractMap(response.data);
+      if (data == null) {
+        throw const ProblemDetails(
+          title: 'No se guardó el umbral',
+          status: 500,
+          detail: 'La respuesta del servidor no contiene estadísticas.',
+        );
+      }
+      return ProductInterest.fromJson(data);
+    } on DioException catch (exception) {
+      throw _extractProblemDetails(exception);
+    }
+  }
+
+  @override
+  Future<void> checkProductInactivity(int productId) async {
+    try {
+      await _dio.post<void>('$productsEndpoint/$productId/check-inactivity');
+    } on DioException catch (exception) {
+      throw _extractProblemDetails(exception);
+    }
   }
 
   Future<_AuthorizedBackendContext> _loadAuthorizedContext({
@@ -429,9 +503,7 @@ class CommercialRemoteDataSourceImpl implements CommercialRemoteDataSource {
         id: 'evt-$productId-3',
         title: 'Reporte Agronómico y Validación de Calidad',
         stage: 'Control Agronómico',
-        description:
-            technicalSummary ??
-            'Evaluación estadística favorable de humedad y estabilidad nutricional durante el ciclo productivo.',
+        description: technicalSummary ?? 'Evaluación estadística favorable de humedad y estabilidad nutricional durante el ciclo productivo.',
         timestamp: reportDate,
         sensorCode: sensorCode,
         metricsSummary:

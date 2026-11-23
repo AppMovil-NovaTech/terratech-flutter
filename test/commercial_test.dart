@@ -5,6 +5,7 @@ import 'package:terratech_mobile/commercial/data/commercial_repository_impl.dart
 import 'package:terratech_mobile/commercial/data/product_model.dart';
 import 'package:terratech_mobile/commercial/data/traceability_model.dart';
 import 'package:terratech_mobile/commercial/domain/commercial_repository.dart';
+import 'package:terratech_mobile/commercial/domain/product_interest.dart';
 import 'package:terratech_mobile/commercial/domain/product.dart';
 import 'package:terratech_mobile/commercial/domain/traceability.dart';
 import 'package:terratech_mobile/commercial/presentation/catalog_bloc.dart';
@@ -43,13 +44,33 @@ class _FakeSecureStorage implements SecureStorage {
 }
 
 class _FakeCommercialRepository implements CommercialRepository {
-  _FakeCommercialRepository({
-    required this.products,
-    this.shouldFail = false,
-  });
+  _FakeCommercialRepository({required this.products, this.shouldFail = false});
 
   final List<Product> products;
   final bool shouldFail;
+
+  // US29: widget tests simulate a successful consultation without network calls.
+  @override
+  Future<void> registerProductConsultation(int productId) async {}
+
+  // These owner-only operations are not exercised by these existing tests.
+  @override
+  Future<ProductInterest> getProductInterest(int productId) async {
+    throw UnimplementedError('US29 interest is not used by this fake.');
+  }
+
+  @override
+  Future<ProductInterest> updateProductInterestThreshold(
+    int productId,
+    int threshold,
+  ) async {
+    throw UnimplementedError('US29 threshold is not used by this fake.');
+  }
+
+  @override
+  Future<void> checkProductInactivity(int productId) async {
+    throw UnimplementedError('US29 inactivity is not used by this fake.');
+  }
 
   @override
   Future<List<Product>> getProducts({
@@ -81,10 +102,7 @@ class _FakeCommercialRepository implements CommercialRepository {
         detail: 'Producto no encontrado.',
       );
     }
-    return products.firstWhere(
-      (p) => p.id == id,
-      orElse: () => products.first,
-    );
+    return products.firstWhere((p) => p.id == id, orElse: () => products.first);
   }
 
   @override
@@ -163,40 +181,55 @@ List<ProductModel> _buildSampleCatalog() {
 
 void main() {
   group('Commercial Domain & Data Models (DTOs)', () {
-    test('MockAuthSession seeds static test user token into SecureStorage', () async {
-      final storage = _FakeSecureStorage();
-      await MockAuthSession.ensureSeeded(storage);
+    test(
+      'MockAuthSession seeds static test user token into SecureStorage',
+      () async {
+        final storage = _FakeSecureStorage();
+        await MockAuthSession.ensureSeeded(storage);
 
-      expect(await storage.getToken(), equals(MockAuthSession.staticJwtToken));
-      expect(
-        await storage.read(MockAuthSession.userEmailStorageKey),
-        equals('test.user@terratech.com'),
-      );
-    });
+        expect(
+          await storage.getToken(),
+          equals(MockAuthSession.staticJwtToken),
+        );
+        expect(
+          await storage.read(MockAuthSession.userEmailStorageKey),
+          equals('test.user@terratech.com'),
+        );
+      },
+    );
 
-    test('ProductModel and TraceabilityModel serialize fromJson and toJson', () {
-      final model = _buildSampleCatalog().first;
-      final json = model.toJson();
-      final roundTrip = ProductModel.fromJson(json);
+    test(
+      'ProductModel and TraceabilityModel serialize fromJson and toJson',
+      () {
+        final model = _buildSampleCatalog().first;
+        final json = model.toJson();
+        final roundTrip = ProductModel.fromJson(json);
 
-      expect(roundTrip.id, equals(1));
-      expect(roundTrip.name, equals('Papa Nativa Huayro Orgánica'));
-      expect(roundTrip.category, equals('Tubérculos'));
-      expect(roundTrip.originRegion, equals('Cusco'));
-      expect(roundTrip.averageRating, equals(4.9));
-      expect(roundTrip.traceability.authorizedInTerraTech, isTrue);
-      expect(roundTrip.traceability.productionEvents, isNotEmpty);
+        expect(roundTrip.id, equals(1));
+        expect(roundTrip.name, equals('Papa Nativa Huayro Orgánica'));
+        expect(roundTrip.category, equals('Tubérculos'));
+        expect(roundTrip.originRegion, equals('Cusco'));
+        expect(roundTrip.averageRating, equals(4.9));
+        expect(roundTrip.traceability.authorizedInTerraTech, isTrue);
+        expect(roundTrip.traceability.productionEvents, isNotEmpty);
 
-      final traceJson = TraceabilityModel.fromEntity(roundTrip.traceability).toJson();
-      final traceRoundTrip = TraceabilityModel.fromJson(traceJson);
-      expect(traceRoundTrip.batchCode, equals(roundTrip.traceability.batchCode));
-      expect(traceRoundTrip.originRegion, equals('Cusco'));
-    });
+        final traceJson = TraceabilityModel.fromEntity(roundTrip.traceability)
+            .toJson();
+        final traceRoundTrip = TraceabilityModel.fromJson(traceJson);
+        expect(
+          traceRoundTrip.batchCode,
+          equals(roundTrip.traceability.batchCode),
+        );
+        expect(traceRoundTrip.originRegion, equals('Cusco'));
+      },
+    );
   });
 
   group('US39 - CatalogBloc State Management', () {
     test('Scenario 1, 2 & 3: Loads catalog, filters by category+region, and searches by name', () async {
-      final repository = _FakeCommercialRepository(products: _buildSampleCatalog());
+      final repository = _FakeCommercialRepository(
+        products: _buildSampleCatalog(),
+      );
       final bloc = CatalogBloc(repository: repository);
 
       // Scenario 1: Load catalog
@@ -209,10 +242,7 @@ void main() {
 
       // Scenario 2: Simultaneous Category + Region filter
       bloc.add(
-        const CatalogFiltersApplied(
-          category: 'Tubérculos',
-          region: 'Cusco',
-        ),
+        const CatalogFiltersApplied(category: 'Tubérculos', region: 'Cusco'),
       );
       await Future<void>.delayed(Duration.zero);
 
@@ -238,82 +268,104 @@ void main() {
       await bloc.close();
     });
 
-    test('Emits failure state with RFC 7807 ProblemDetails message on error', () async {
-      final repository = _FakeCommercialRepository(
-        products: const <Product>[],
-        shouldFail: true,
-      );
-      final bloc = CatalogBloc(repository: repository);
+    test(
+      'Emits failure state with RFC 7807 ProblemDetails message on error',
+      () async {
+        final repository = _FakeCommercialRepository(
+          products: const <Product>[],
+          shouldFail: true,
+        );
+        final bloc = CatalogBloc(repository: repository);
 
-      bloc.add(const LoadCatalogRequested());
-      await Future<void>.delayed(Duration.zero);
+        bloc.add(const LoadCatalogRequested());
+        await Future<void>.delayed(Duration.zero);
 
-      expect(bloc.state.status, equals(CatalogStatus.failure));
-      expect(
-        bloc.state.errorMessage,
-        equals('No se pudo conectar con el servidor de catálogo.'),
-      );
-      expect(bloc.state.problemDetails?.status, equals(503));
+        expect(bloc.state.status, equals(CatalogStatus.failure));
+        expect(
+          bloc.state.errorMessage,
+          equals('No se pudo conectar con el servidor de catálogo.'),
+        );
+        expect(bloc.state.problemDetails?.status, equals(503));
 
-      await bloc.close();
-    });
+        await bloc.close();
+      },
+    );
   });
 
   group('US39 & US40 - Widget Integration Tests', () {
-    testWidgets('CatalogScreen displays products, filters in real-time, and navigates to ProductDetailScreen', (tester) async {
-      final repository = _FakeCommercialRepository(products: _buildSampleCatalog());
+    testWidgets(
+      'CatalogScreen displays products, filters in real-time, and navigates to ProductDetailScreen',
+      (tester) async {
+        final repository = _FakeCommercialRepository(
+          products: _buildSampleCatalog(),
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: CatalogScreen(repository: repository),
-        ),
-      );
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          MaterialApp(home: CatalogScreen(repository: repository)),
+        );
+        await tester.pumpAndSettle();
 
-      // US39 Scenario 1: Verify catalog cards display name, price, region, and rating
-      expect(find.text('Papa Nativa Huayro Orgánica'), findsOneWidget);
-      expect(find.text('S/ 6.80'), findsOneWidget);
-      expect(find.text('4.9'), findsOneWidget);
+        // US39 Scenario 1: Verify catalog cards display name, price, region, and rating
+        expect(find.text('Papa Nativa Huayro Orgánica'), findsOneWidget);
+        expect(find.text('S/ 6.80'), findsOneWidget);
+        expect(find.text('4.9'), findsOneWidget);
 
-      // US39 Scenario 3: Real-time search by name in header
-      await tester.enterText(
-        find.byKey(const Key('catalog_search_textfield')),
-        'Papa Nativa',
-      );
-      await tester.pumpAndSettle();
+        // US39 Scenario 3: Real-time search by name in header
+        await tester.enterText(
+          find.byKey(const Key('catalog_search_textfield')),
+          'Papa Nativa',
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Papa Nativa Huayro Orgánica'), findsOneWidget);
-      expect(find.text('Café Especial Arábica Chanchamayo'), findsNothing);
+        expect(find.text('Papa Nativa Huayro Orgánica'), findsOneWidget);
+        expect(find.text('Café Especial Arábica Chanchamayo'), findsNothing);
 
-      // Navigate to ProductDetailScreen (US40 Scenario 1)
-      await tester.tap(find.byKey(const Key('product_card_1')));
-      await tester.pumpAndSettle();
+        // Navigate to ProductDetailScreen (US40 Scenario 1)
+        await tester.tap(find.byKey(const Key('product_card_1')));
+        await tester.pumpAndSettle();
 
-      expect(find.byType(ProductDetailScreen), findsOneWidget);
-      expect(find.text('Papa Nativa Huayro Orgánica'), findsWidgets);
-      expect(find.text('Cooperativa Agrícola Valle Andino'), findsWidgets);
-      expect(find.text('Prácticas de Cultivo Registradas'), findsOneWidget);
+        expect(find.byType(ProductDetailScreen), findsOneWidget);
+        expect(find.text('Papa Nativa Huayro Orgánica'), findsWidgets);
+        expect(find.text('Cooperativa Agrícola Valle Andino'), findsWidgets);
+        expect(find.text('Prácticas de Cultivo Registradas'), findsOneWidget);
 
-      // US40 Scenario 2: Verify dedicated Traceability section and authorization notice
-      expect(find.byKey(const Key('traceability_inquiry_section')), findsOneWidget);
-      expect(
-        find.text('Información previamente registrada y autorizada en TerraTech'),
-        findsOneWidget,
-      );
-      expect(find.text('Eventos de Producción Asociados'), findsOneWidget);
+        // US40 Scenario 2: Verify dedicated Traceability section and authorization notice
+        expect(
+          find.byKey(const Key('traceability_inquiry_section')),
+          findsOneWidget,
+        );
+        expect(
+          find.text(
+            'Información previamente registrada y autorizada en TerraTech',
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Eventos de Producción Asociados'), findsOneWidget);
 
-      // US40 Scenario 3: Verify "Contactar al Agricultor" action and absence of Shopping Cart
-      expect(find.byKey(const Key('contact_farmer_primary_button')), findsOneWidget);
-      expect(find.byIcon(Icons.shopping_cart), findsNothing);
+        // US40 Scenario 3: Verify "Contactar al Agricultor" action and absence of Shopping Cart
+        expect(
+          find.byKey(const Key('contact_farmer_primary_button')),
+          findsOneWidget,
+        );
+        expect(find.byIcon(Icons.shopping_cart), findsNothing);
 
-      await tester.tap(find.byKey(const Key('contact_farmer_primary_button')));
-      await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const Key('contact_farmer_primary_button')),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('submit_contact_farmer_button')), findsOneWidget);
-      await tester.tap(find.byKey(const Key('submit_contact_farmer_button')));
-      await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('submit_contact_farmer_button')),
+          findsOneWidget,
+        );
+        await tester.tap(find.byKey(const Key('submit_contact_farmer_button')));
+        await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('contact_farmer_success_snackbar')), findsOneWidget);
-    });
+        expect(
+          find.byKey(const Key('contact_farmer_success_snackbar')),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }

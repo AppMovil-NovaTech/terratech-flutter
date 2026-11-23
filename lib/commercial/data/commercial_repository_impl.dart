@@ -1,5 +1,6 @@
 import '../domain/commercial_repository.dart';
 import '../domain/product.dart';
+import '../domain/product_interest.dart';
 import '../domain/traceability.dart';
 import 'commercial_remote_datasource.dart';
 
@@ -31,6 +32,32 @@ class CommercialRepositoryImpl implements CommercialRepository {
   }
 
   @override
+  Future<void> registerProductConsultation(int productId) {
+    return remoteDataSource.registerProductConsultation(productId);
+  }
+
+  @override
+  Future<ProductInterest> getProductInterest(int productId) {
+    return remoteDataSource.getProductInterest(productId);
+  }
+
+  @override
+  Future<ProductInterest> updateProductInterestThreshold(
+    int productId,
+    int threshold,
+  ) {
+    return remoteDataSource.updateProductInterestThreshold(
+      productId,
+      threshold,
+    );
+  }
+
+  @override
+  Future<void> checkProductInactivity(int productId) {
+    return remoteDataSource.checkProductInactivity(productId);
+  }
+
+  @override
   Future<TraceabilityInfo> getProductTraceability(int productId) {
     return remoteDataSource.getProductTraceability(productId);
   }
@@ -40,10 +67,7 @@ class CommercialRepositoryImpl implements CommercialRepository {
     required Product product,
     required String message,
   }) {
-    return remoteDataSource.contactFarmer(
-      product: product,
-      message: message,
-    );
+    return remoteDataSource.contactFarmer(product: product, message: message);
   }
 
   /// Applies simultaneous category, origin region, and partial/total name search
@@ -58,21 +82,23 @@ class CommercialRepositoryImpl implements CommercialRepository {
     final normalizedRegion = _normalizeFilterValue(region);
     final normalizedSearch = _normalizeText(searchQuery ?? '');
 
-    return products.where((product) {
-      final matchesCategory =
-          normalizedCategory == null ||
-          _normalizeText(product.category) == normalizedCategory;
+    return products
+        .where((product) {
+          final matchesCategory =
+              normalizedCategory == null ||
+              _normalizeText(product.category) == normalizedCategory;
 
-      final matchesRegion =
-          normalizedRegion == null ||
-          _normalizeText(product.originRegion) == normalizedRegion;
+          final matchesRegion =
+              normalizedRegion == null ||
+              _normalizeText(product.originRegion) == normalizedRegion;
 
-      final matchesSearch =
-          normalizedSearch.isEmpty ||
-          _normalizeText(product.name).contains(normalizedSearch);
+          final matchesSearch =
+              normalizedSearch.isEmpty ||
+              _normalizeText(product.name).contains(normalizedSearch);
 
-      return matchesCategory && matchesRegion && matchesSearch;
-    }).toList(growable: false);
+          return matchesCategory && matchesRegion && matchesSearch;
+        })
+        .toList(growable: false);
   }
 
   static String? _normalizeFilterValue(String? value) {

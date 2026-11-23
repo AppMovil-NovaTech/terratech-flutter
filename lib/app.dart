@@ -57,6 +57,7 @@ class _TerraTechAppState extends State<TerraTechApp> {
         settings,
         commercialRepository: _commercialRepository,
         dioClient: widget.dioClient,
+        secureStorage: widget.secureStorage,
       ),
     );
   }

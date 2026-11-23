@@ -18,6 +18,10 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
 
   final CommercialRepository repository;
 
+  // A consultation represents one successful opening of this detail screen,
+  // not every product GET (traceability also reloads product data).
+  bool _consultationAttempted = false;
+
   Future<void> _onLoadProductDetailRequested(
     LoadProductDetailRequested event,
     Emitter<ProductDetailState> emit,
@@ -50,6 +54,16 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
           problemDetails: () => null,
         ),
       );
+
+      if (!_consultationAttempted) {
+        _consultationAttempted = true;
+        try {
+          await repository.registerProductConsultation(event.productId);
+        } catch (_) {
+          // A metrics endpoint failure must not prevent product viewing.
+          // At most one attempt is made per detail-screen BLoC instance.
+        }
+      }
     } on ProblemDetails catch (problem) {
       if (state.product != null) {
         return;
