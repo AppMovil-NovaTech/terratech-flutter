@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+
 /// Modal bottom sheet allowing the user to select and apply category and
 /// origin region filters simultaneously (US39 - Scenario 2).
 class SimultaneousFilterSheet extends StatefulWidget {
@@ -38,44 +41,49 @@ class _SimultaneousFilterSheetState extends State<SimultaneousFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        AppSpacing.xs,
+        AppSpacing.xl,
+        AppSpacing.xxl,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
             children: <Widget>[
-              Icon(Icons.filter_alt_outlined, color: colorScheme.primary),
-              const SizedBox(width: 8),
+              const Icon(Icons.filter_alt_outlined, color: AppColors.primary),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 'Filtrar Catálogo Agrícola',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             'Combina filtros de categoría y región de origen para encontrar lotes específicos.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+              color: AppColors.textSecondary,
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.lg),
           Text(
             'Categoría del Producto',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: <Widget>[
               ChoiceChip(
                 label: const Text('Todas'),
@@ -96,17 +104,18 @@ class _SimultaneousFilterSheetState extends State<SimultaneousFilterSheet> {
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.lg),
           Text(
             'Región de Origen',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: AppColors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: <Widget>[
               ChoiceChip(
                 label: const Text('Todas'),
@@ -127,7 +136,7 @@ class _SimultaneousFilterSheetState extends State<SimultaneousFilterSheet> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xxl),
           Row(
             children: <Widget>[
               Expanded(
@@ -140,7 +149,7 @@ class _SimultaneousFilterSheetState extends State<SimultaneousFilterSheet> {
                   child: const Text('Restablecer'),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: FilledButton.icon(
                   key: const Key('sheet_apply_filters_button'),
