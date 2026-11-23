@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+
 /// Interactive image carousel and thumbnail selector for the product detail
 /// screen (US40 - Scenario 1).
 class ProductImageGallery extends StatelessWidget {
@@ -67,7 +70,7 @@ class ProductImageGallery extends StatelessWidget {
                 },
               ),
               Positioned(
-                bottom: 12,
+                bottom: AppSpacing.md,
                 left: 0,
                 right: 0,
                 child: Row(
@@ -81,9 +84,11 @@ class ProductImageGallery extends StatelessWidget {
                       height: 8,
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? Colors.white
-                            : Colors.white.withValues(alpha: 0.55),
-                        borderRadius: BorderRadius.circular(10),
+                            ? AppColors.surface
+                            : AppColors.whiteSoft,
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusPill,
+                        ),
                       ),
                     );
                   }),
@@ -95,12 +100,15 @@ class ProductImageGallery extends StatelessWidget {
         if (images.length > 1)
           Container(
             height: 64,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: colorScheme.surfaceContainerLow,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            color: AppColors.surfaceSubtle,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: images.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 10),
+              separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
               itemBuilder: (context, index) {
                 final isSelected = index == currentIndex;
                 return GestureDetector(
@@ -114,11 +122,11 @@ class ProductImageGallery extends StatelessWidget {
                   child: Container(
                     width: 64,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                       border: Border.all(
                         color: isSelected
                             ? colorScheme.primary
-                            : colorScheme.outlineVariant,
+                            : AppColors.borderSubtle,
                         width: isSelected ? 2.2 : 1,
                       ),
                     ),
