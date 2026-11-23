@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/router/app_routes.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
 import '../data/commercial_remote_datasource.dart';
 import '../domain/commercial_repository.dart';
 import '../domain/product.dart';
@@ -118,7 +120,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
         },
         builder: (context, state) {
           return Scaffold(
-            backgroundColor: colorScheme.surface,
+            backgroundColor: AppColors.scaffoldBackground,
             appBar: AppBar(
               backgroundColor: colorScheme.primary,
               foregroundColor: colorScheme.onPrimary,
@@ -135,22 +137,20 @@ class _CatalogScreenState extends State<CatalogScreen> {
                   ),
                   Row(
                     children: <Widget>[
-                      Text(
+                      const Text(
                         'TerraTech Home',
                         style: TextStyle(
                           fontSize: 11,
-                          color: colorScheme.onPrimary.withValues(alpha: 0.85),
+                          color: AppColors.whiteHigh,
                         ),
                       ),
                       Flexible(
                         child: Text(
                           ' • ${MockAuthSession.testUserEmail}',
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 11,
-                            color: colorScheme.onPrimary.withValues(
-                              alpha: 0.85,
-                            ),
+                            color: AppColors.whiteHigh,
                           ),
                         ),
                       ),
@@ -270,12 +270,17 @@ class _CatalogScreenState extends State<CatalogScreen> {
           child: _isGridView
               ? GridView.builder(
                   key: const Key('catalog_product_grid'),
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                    AppSpacing.lg,
+                    AppSpacing.xxl,
+                  ),
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 260,
                     mainAxisExtent: 310,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
+                    crossAxisSpacing: AppSpacing.md,
+                    mainAxisSpacing: AppSpacing.md,
                   ),
                   itemCount: state.filteredProducts.length,
                   itemBuilder: (context, index) {
@@ -288,9 +293,14 @@ class _CatalogScreenState extends State<CatalogScreen> {
                 )
               : ListView.separated(
                   key: const Key('catalog_product_list'),
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                    AppSpacing.lg,
+                    AppSpacing.xxl,
+                  ),
                   itemCount: state.filteredProducts.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 12),
+                  separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
                   itemBuilder: (context, index) {
                     final product = state.filteredProducts[index];
                     return ProductListTileCard(

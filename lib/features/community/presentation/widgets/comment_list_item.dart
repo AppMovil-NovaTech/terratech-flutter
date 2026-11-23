@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/comment.dart';
 import 'star_rating_bar.dart';
 
@@ -20,7 +22,7 @@ class CommentListItem extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
-  static const Color primaryGreen = Color(0xFF2E7D32);
+  static const Color primaryGreen = AppColors.primary;
 
   bool get isOwner => currentUserId != null && comment.userId == currentUserId;
 
@@ -32,12 +34,15 @@ class CommentListItem extends StatelessWidget {
         : '?';
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xs,
+      ),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.borderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,7 +63,7 @@ class CommentListItem extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               // Author, stars & date
               Expanded(
                 child: Column(
@@ -68,21 +73,21 @@ class CommentListItem extends StatelessWidget {
                       comment.authorName,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xFF1E293B),
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.xxs),
                     Row(
                       children: [
                         StarRatingBar(
                           rating: comment.rating.toDouble(),
                           starSize: 14,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         Text(
                           _formatRelativeDate(comment.createdAt),
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.grey.shade500,
+                            color: AppColors.textMuted,
                             fontSize: 11,
                           ),
                         ),
@@ -94,10 +99,10 @@ class CommentListItem extends StatelessWidget {
               // Owner action menu
               if (isOwner)
                 PopupMenuButton<String>(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.more_vert,
                     size: 20,
-                    color: Colors.grey.shade600,
+                    color: AppColors.textMuted,
                   ),
                   tooltip: 'Opciones de mi reseña',
                   onSelected: (value) {
@@ -113,7 +118,7 @@ class CommentListItem extends StatelessWidget {
                       child: Row(
                         children: [
                           Icon(Icons.edit_outlined, size: 18),
-                          SizedBox(width: 8),
+                          SizedBox(width: AppSpacing.sm),
                           Text('Editar'),
                         ],
                       ),
@@ -122,9 +127,16 @@ class CommentListItem extends StatelessWidget {
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Eliminar', style: TextStyle(color: Colors.red)),
+                          Icon(
+                            Icons.delete_outline,
+                            size: 18,
+                            color: AppColors.error,
+                          ),
+                          SizedBox(width: AppSpacing.sm),
+                          Text(
+                            'Eliminar',
+                            style: TextStyle(color: AppColors.error),
+                          ),
                         ],
                       ),
                     ),
@@ -132,12 +144,12 @@ class CommentListItem extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           // Comment body text
           Text(
             comment.content,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFF334155),
+              color: AppColors.textSecondary,
               height: 1.35,
             ),
           ),
@@ -161,7 +173,7 @@ class CommentListItem extends StatelessWidget {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: Colors.red.shade700,
+              backgroundColor: AppColors.error,
             ),
             onPressed: () {
               Navigator.of(dialogContext).pop();

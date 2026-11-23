@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../commercial/data/commercial_remote_datasource.dart';
 import '../../../../core/network/dio_client.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../data/datasources/product_reviews_remote_data_source.dart';
 import '../../data/repositories/product_reviews_repository_impl.dart';
 import '../../domain/entities/comment.dart';
@@ -62,7 +64,7 @@ class _ProductReviewsScreenState extends State<ProductReviewsScreen> {
   late final ProductReviewsController _controller;
   late final bool _isInternalController;
 
-  static const Color primaryGreen = Color(0xFF2E7D32);
+  static const Color primaryGreen = AppColors.primary;
 
   bool get _canWriteReview {
     if (widget.currentUserId == null) return false;
@@ -126,7 +128,7 @@ class _ProductReviewsScreenState extends State<ProductReviewsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(msg),
-          backgroundColor: Colors.red.shade700,
+          backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -182,7 +184,7 @@ class _ProductReviewsScreenState extends State<ProductReviewsScreen> {
         final state = _controller.state;
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF8FAFC),
+          backgroundColor: AppColors.scaffoldBackground,
           appBar: AppBar(
             title: Column(
               mainAxisSize: MainAxisSize.min,
@@ -195,7 +197,7 @@ class _ProductReviewsScreenState extends State<ProductReviewsScreen> {
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF64748B),
+                      color: AppColors.textMuted,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -203,15 +205,15 @@ class _ProductReviewsScreenState extends State<ProductReviewsScreen> {
               ],
             ),
             centerTitle: true,
-            backgroundColor: Colors.white,
-            foregroundColor: const Color(0xFF1E293B),
+            backgroundColor: AppColors.surface,
+            foregroundColor: AppColors.textPrimary,
             elevation: 0.5,
           ),
           floatingActionButton: _canWriteReview
               ? FloatingActionButton.extended(
                   key: const Key('add_review_fab'),
                   backgroundColor: primaryGreen,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.surface,
                   icon: const Icon(Icons.rate_review_outlined),
                   label: const Text(
                     'Escribir opinión',
@@ -230,7 +232,12 @@ class _ProductReviewsScreenState extends State<ProductReviewsScreen> {
                 if (state.summary != null)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                        AppSpacing.sm,
+                      ),
                       child: RatingSummaryCard(
                         summary: state.summary!,
                         onRatingBarTap: (stars) {
@@ -255,8 +262,8 @@ class _ProductReviewsScreenState extends State<ProductReviewsScreen> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.sm,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -268,7 +275,7 @@ class _ProductReviewsScreenState extends State<ProductReviewsScreen> {
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1E293B),
+                            color: AppColors.textPrimary,
                           ),
                         ),
                       ],
@@ -286,36 +293,36 @@ class _ProductReviewsScreenState extends State<ProductReviewsScreen> {
                   )
                 // Empty state
                 else if (state.comments.isEmpty)
-                  SliverFillRemaining(
+                  const SliverFillRemaining(
                     hasScrollBody: false,
                     child: Center(
                       child: Padding(
-                        padding: const EdgeInsets.all(32.0),
+                        padding: EdgeInsets.all(AppSpacing.xxxl),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               Icons.rate_review_outlined,
                               size: 64,
-                              color: Colors.grey.shade400,
+                              color: AppColors.border,
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: AppSpacing.lg),
                             Text(
                               'Aún no hay opiniones para este filtro.',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.grey.shade700,
+                                color: AppColors.textSecondary,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            SizedBox(height: AppSpacing.xs),
                             Text(
                               '¡Sé el primero en compartir tu experiencia!',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.grey.shade500,
+                                color: AppColors.textMuted,
                               ),
                             ),
                           ],

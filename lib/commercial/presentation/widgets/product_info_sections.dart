@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../domain/product.dart';
 import '../../domain/traceability.dart';
 
@@ -21,17 +23,17 @@ class ProductPrimaryHeaderCard extends StatelessWidget {
       elevation: 0,
       color: colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         side: BorderSide(color: colorScheme.outlineVariant),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
                 Chip(
@@ -54,13 +56,13 @@ class ProductPrimaryHeaderCard extends StatelessWidget {
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF8E1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFFFE082)),
+                    color: AppColors.starBadgeBackground,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+                    border: Border.all(color: AppColors.starBadgeBorder),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -68,15 +70,15 @@ class ProductPrimaryHeaderCard extends StatelessWidget {
                       const Icon(
                         Icons.star_rounded,
                         size: 16,
-                        color: Color(0xFFF9A825),
+                        color: AppColors.starAmber,
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: AppSpacing.xs),
                       Text(
                         '${product.averageRating.toStringAsFixed(1)} (${product.reviewCount} reseñas)',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF5D4037),
+                          color: AppColors.starBadgeText,
                         ),
                       ),
                     ],

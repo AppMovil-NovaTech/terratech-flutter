@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+
 /// Reusable star rating bar displaying 5 stars (filled, half, or empty)
 /// according to the provided [rating].
 class StarRatingBar extends StatelessWidget {
@@ -7,8 +9,8 @@ class StarRatingBar extends StatelessWidget {
     super.key,
     required this.rating,
     this.starSize = 20.0,
-    this.color = const Color(0xFFFFB300),
-    this.emptyColor = const Color(0xFFBDBDBD),
+    this.color = AppColors.starGold,
+    this.emptyColor = AppColors.border,
   });
 
   final double rating;

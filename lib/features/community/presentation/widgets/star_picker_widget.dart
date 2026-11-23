@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+
 /// Interactive 5-star rating picker widget for review creation and editing (US35).
 class StarPickerWidget extends StatelessWidget {
   const StarPickerWidget({
@@ -7,8 +10,8 @@ class StarPickerWidget extends StatelessWidget {
     required this.rating,
     required this.onRatingChanged,
     this.starSize = 36.0,
-    this.activeColor = const Color(0xFFFFB300),
-    this.inactiveColor = const Color(0xFFE2E8F0),
+    this.activeColor = AppColors.starGold,
+    this.inactiveColor = AppColors.surfaceMuted,
   });
 
   final int rating;
@@ -44,7 +47,7 @@ class StarPickerWidget extends StatelessWidget {
               key: Key('star_picker_$starNumber'),
               onPressed: () => onRatingChanged(starNumber),
               iconSize: starSize,
-              padding: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
               constraints: const BoxConstraints(),
               icon: Icon(
                 isFilled ? Icons.star : Icons.star_border,
@@ -54,13 +57,13 @@ class StarPickerWidget extends StatelessWidget {
             );
           }),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppSpacing.xs),
         Text(
           currentLabel,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            color: activeColor == const Color(0xFFFFB300)
-                ? const Color(0xFFB45309)
+            color: activeColor == AppColors.starGold
+                ? AppColors.starLabelDeep
                 : activeColor,
           ),
         ),

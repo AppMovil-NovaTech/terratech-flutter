@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../data/commercial_remote_datasource.dart';
 import '../../domain/product.dart';
 import '../product_detail_bloc.dart';
@@ -25,11 +27,16 @@ class ContactFarmerBottomBar extends StatelessWidget {
 
     return SafeArea(
       child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.lg,
+          AppSpacing.md,
+        ),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
           border: Border(
-            top: BorderSide(color: colorScheme.outlineVariant),
+            top: BorderSide(color: AppColors.borderSubtle),
           ),
         ),
         child: Row(
@@ -56,17 +63,17 @@ class ContactFarmerBottomBar extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             FilledButton.icon(
               key: const Key('contact_farmer_primary_button'),
               onPressed: onContactPressed,
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 14,
+                  horizontal: AppSpacing.xl,
+                  vertical: AppSpacing.md,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
               ),
               icon: const Icon(Icons.contact_phone_rounded),
@@ -125,7 +132,12 @@ class _ContactFarmerBottomSheetState extends State<ContactFarmerBottomSheet> {
     final viewInsets = MediaQuery.of(context).viewInsets;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 4, 20, 24 + viewInsets.bottom),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        AppSpacing.xs,
+        AppSpacing.xl,
+        AppSpacing.xxl + viewInsets.bottom,
+      ),
       child: BlocBuilder<ProductDetailBloc, ProductDetailState>(
         builder: (context, state) {
           final isSubmitting =
