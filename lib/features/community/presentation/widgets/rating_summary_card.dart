@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/product_rating_summary.dart';
 import 'star_rating_bar.dart';
 
@@ -15,8 +17,8 @@ class RatingSummaryCard extends StatelessWidget {
   final ProductRatingSummary summary;
   final ValueChanged<int>? onRatingBarTap;
 
-  static const Color primaryGreen = Color(0xFF2E7D32);
-  static const Color starAmber = Color(0xFFFFB300);
+  static const Color primaryGreen = AppColors.primary;
+  static const Color starAmber = AppColors.starGold;
 
   @override
   Widget build(BuildContext context) {
@@ -25,12 +27,12 @@ class RatingSummaryCard extends StatelessWidget {
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        side: const BorderSide(color: AppColors.borderSubtle),
       ),
-      color: Colors.white,
+      color: AppColors.surface,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -47,29 +49,29 @@ class RatingSummaryCard extends StatelessWidget {
                         summary.averageRating.toStringAsFixed(1),
                         style: theme.textTheme.displaySmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1E293B),
+                          color: AppColors.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppSpacing.xs),
                       StarRatingBar(
                         rating: summary.averageRating,
                         starSize: 20,
                         color: starAmber,
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: AppSpacing.xs),
                       Text(
                         summary.totalReviews == 0
                             ? 'Sin opiniones aún'
                             : 'Basado en ${summary.totalReviews} ${summary.totalReviews == 1 ? "opinión" : "opiniones"}',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.grey.shade600,
+                          color: AppColors.textMuted,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppSpacing.lg),
                 // Right side: 5 to 1 star histogram bars
                 Expanded(
                   flex: 6,
@@ -85,9 +87,11 @@ class RatingSummaryCard extends StatelessWidget {
                         onTap: (onRatingBarTap != null && count > 0)
                             ? () => onRatingBarTap!(star)
                             : null,
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(AppSpacing.xs),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 2.0),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.xxs,
+                          ),
                           child: Row(
                             children: [
                               SizedBox(
@@ -96,32 +100,34 @@ class RatingSummaryCard extends StatelessWidget {
                                   '$star ★',
                                   style: theme.textTheme.labelSmall?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.grey.shade700,
+                                    color: AppColors.textSecondary,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 6),
+                              const SizedBox(width: AppSpacing.xs),
                               Expanded(
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.xs,
+                                  ),
                                   child: LinearProgressIndicator(
                                     value: progress,
                                     minHeight: 8,
-                                    backgroundColor: Colors.grey.shade200,
+                                    backgroundColor: AppColors.surfaceMuted,
                                     valueColor: const AlwaysStoppedAnimation<Color>(
                                       primaryGreen,
                                     ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: AppSpacing.sm),
                               SizedBox(
                                 width: 26,
                                 child: Text(
                                   '$count',
                                   textAlign: TextAlign.end,
                                   style: theme.textTheme.labelSmall?.copyWith(
-                                    color: Colors.grey.shade600,
+                                    color: AppColors.textMuted,
                                   ),
                                 ),
                               ),
@@ -136,28 +142,28 @@ class RatingSummaryCard extends StatelessWidget {
             ),
             // Low reputation alert banner (US34 Scenario 2)
             if (summary.hasLowReputationAlert) ...[
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3CD),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFFFEBAA)),
+                  color: AppColors.warningBackground,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                  border: Border.all(color: AppColors.warningBorder),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Icon(
                       Icons.warning_amber_rounded,
-                      color: Color(0xFF856404),
+                      color: AppColors.warningForeground,
                       size: 20,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         'Producto con calificación menor a 3.0 estrellas. Te sugerimos revisar las sugerencias de los compradores.',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF856404),
+                          color: AppColors.warningForeground,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

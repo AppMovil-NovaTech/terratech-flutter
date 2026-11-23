@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/comment.dart';
 import 'star_picker_widget.dart';
 
@@ -17,7 +19,7 @@ class ReviewInputBottomSheet extends StatefulWidget {
     required int rating,
   }) onSubmit;
 
-  static const Color primaryGreen = Color(0xFF2E7D32);
+  static const Color primaryGreen = AppColors.primary;
   static const int minChars = 10;
   static const int maxChars = 500;
 
@@ -102,14 +104,16 @@ class _ReviewInputBottomSheetState extends State<ReviewInputBottomSheet> {
 
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusXl),
+        ),
       ),
       padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 16,
-        bottom: viewInsets.bottom + 20,
+        left: AppSpacing.xl,
+        right: AppSpacing.xl,
+        top: AppSpacing.lg,
+        bottom: viewInsets.bottom + AppSpacing.xl,
       ),
       child: SingleChildScrollView(
         child: Form(
@@ -123,10 +127,10 @@ class _ReviewInputBottomSheetState extends State<ReviewInputBottomSheet> {
                 child: Container(
                   width: 40,
                   height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
+                  margin: const EdgeInsets.only(bottom: AppSpacing.lg),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(AppSpacing.xxs),
                   ),
                 ),
               ),
@@ -138,7 +142,7 @@ class _ReviewInputBottomSheetState extends State<ReviewInputBottomSheet> {
                     isEditing ? 'Editar tu opinión' : 'Escribe tu opinión',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1E293B),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   IconButton(
@@ -148,7 +152,7 @@ class _ReviewInputBottomSheetState extends State<ReviewInputBottomSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               // Interactive Star Picker
               StarPickerWidget(
                 rating: _rating,
@@ -156,7 +160,7 @@ class _ReviewInputBottomSheetState extends State<ReviewInputBottomSheet> {
                   setState(() => _rating = newRating);
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xl),
               // Review content input
               TextFormField(
                 key: const Key('review_content_input'),
@@ -166,20 +170,23 @@ class _ReviewInputBottomSheetState extends State<ReviewInputBottomSheet> {
                 decoration: InputDecoration(
                   hintText:
                       'Cuéntanos tu experiencia con este producto (calidad, rendimiento, etc.)...',
-                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                  hintStyle: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 14,
+                  ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                    borderSide: const BorderSide(color: AppColors.border),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     borderSide: const BorderSide(
                       color: ReviewInputBottomSheet.primaryGreen,
                       width: 1.5,
                     ),
                   ),
                   filled: true,
-                  fillColor: Colors.grey.shade50,
+                  fillColor: AppColors.surfaceSubtle,
                   alignLabelWithHint: true,
                 ),
                 validator: (value) {
@@ -194,24 +201,24 @@ class _ReviewInputBottomSheetState extends State<ReviewInputBottomSheet> {
                 },
               ),
               if (_inlineError != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   _inlineError!,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.red.shade700,
+                    color: AppColors.error,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               // Submit button
               FilledButton(
                 key: const Key('review_submit_button'),
                 style: FilledButton.styleFrom(
                   backgroundColor: ReviewInputBottomSheet.primaryGreen,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                   ),
                 ),
                 onPressed: _isSubmitting ? null : _handleSubmit,
@@ -221,7 +228,7 @@ class _ReviewInputBottomSheetState extends State<ReviewInputBottomSheet> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       )
                     : Text(
@@ -229,7 +236,7 @@ class _ReviewInputBottomSheetState extends State<ReviewInputBottomSheet> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       ),
               ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/product_rating_summary.dart';
 
 /// Horizontal scrollable bar of rating filter chips (US33 Scenario 2, US36 Scenario 3).
@@ -15,7 +17,7 @@ class RatingFilterChips extends StatelessWidget {
   final ProductRatingSummary? summary;
   final ValueChanged<int?> onSelected;
 
-  static const Color primaryGreen = Color(0xFF2E7D32);
+  static const Color primaryGreen = AppColors.primary;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,10 @@ class RatingFilterChips extends StatelessWidget {
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
+      ),
       child: Row(
         children: [
           // "Todas" chip
@@ -37,12 +42,12 @@ class RatingFilterChips extends StatelessWidget {
             isSelected: selectedRating == null,
             onTap: () => onSelected(null),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           // Star chips with existing reviews
           ...availableStars.map((star) {
             final count = summary?.ratingBreakdown.countForRating(star) ?? 0;
             return Padding(
-              padding: const EdgeInsets.only(right: 8.0),
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
               child: _buildChip(
                 label: '$star ★ ($count)',
                 isSelected: selectedRating == star,
@@ -67,17 +72,17 @@ class RatingFilterChips extends StatelessWidget {
       selectedColor: primaryGreen.withValues(alpha: 0.15),
       checkmarkColor: primaryGreen,
       labelStyle: TextStyle(
-        color: isSelected ? primaryGreen : const Color(0xFF334155),
+        color: isSelected ? primaryGreen : AppColors.textSecondary,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
         fontSize: 13,
       ),
       side: BorderSide(
-        color: isSelected ? primaryGreen : Colors.grey.shade300,
+        color: isSelected ? primaryGreen : AppColors.border,
       ),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       showCheckmark: isSelected,
     );
   }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/router/app_routes.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
 import '../data/commercial_remote_datasource.dart';
 import '../domain/commercial_repository.dart';
 import '../domain/product.dart';
@@ -304,7 +306,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     traceability,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 SectionContainerCard(
                   title: 'Opiniones y Reputación de Compradores',
                   icon: Icons.reviews_outlined,
@@ -315,14 +317,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         children: <Widget>[
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFFF8E1),
-                              borderRadius: BorderRadius.circular(12),
+                              color: AppColors.starBadgeBackground,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusMd,
+                              ),
                               border: Border.all(
-                                color: const Color(0xFFFFE082),
+                                color: AppColors.starBadgeBorder,
                               ),
                             ),
                             child: Row(
@@ -330,10 +334,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               children: <Widget>[
                                 const Icon(
                                   Icons.star_rounded,
-                                  color: Color(0xFFF9A825),
+                                  color: AppColors.starAmber,
                                   size: 22,
                                 ),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: AppSpacing.xs),
                                 Text(
                                   product.averageRating.toStringAsFixed(1),
                                   style: Theme.of(context)
@@ -341,13 +345,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       .titleMedium
                                       ?.copyWith(
                                         fontWeight: FontWeight.w800,
-                                        color: const Color(0xFF5D4037),
+                                        color: AppColors.starBadgeText,
                                       ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.md),
                           Expanded(
                             child: Text(
                               'Basado en ${product.reviewCount} reseñas verificadas de compradores en la comunidad TerraTech.',

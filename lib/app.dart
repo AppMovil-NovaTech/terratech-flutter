@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'core/theme/app_theme.dart';
+
 import 'commercial/data/commercial_remote_datasource.dart';
 import 'commercial/data/commercial_repository_impl.dart';
 import 'commercial/domain/commercial_repository.dart';
@@ -48,10 +50,7 @@ class _TerraTechAppState extends State<TerraTechApp> {
     return MaterialApp(
       title: 'TerraTech',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2E7D32)),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light(),
       initialRoute: AppRoutes.home,
       onGenerateRoute: (settings) => AppRouter.onGenerateRoute(
         settings,
