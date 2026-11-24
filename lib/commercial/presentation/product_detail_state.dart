@@ -20,7 +20,9 @@ enum ContactFarmerStatus {
   failure,
 }
 
-/// Immutable state managed by `ProductDetailBloc` for US40.
+enum FavoriteStatus { unavailable, loading, ready, saving, failure }
+
+/// Immutable state managed by `ProductDetailBloc` for US40 and US32.
 final class ProductDetailState extends Equatable {
   const ProductDetailState({
     this.status = ProductDetailStatus.initial,
@@ -32,6 +34,9 @@ final class ProductDetailState extends Equatable {
     this.errorMessage,
     this.contactErrorMessage,
     this.problemDetails,
+    this.favoriteStatus = FavoriteStatus.unavailable,
+    this.isFavorite = false,
+    this.favoriteErrorMessage,
   });
 
   final ProductDetailStatus status;
@@ -43,6 +48,9 @@ final class ProductDetailState extends Equatable {
   final String? errorMessage;
   final String? contactErrorMessage;
   final ProblemDetails? problemDetails;
+  final FavoriteStatus favoriteStatus;
+  final bool isFavorite;
+  final String? favoriteErrorMessage;
 
   ProductDetailState copyWith({
     ProductDetailStatus? status,
@@ -54,6 +62,9 @@ final class ProductDetailState extends Equatable {
     String? Function()? errorMessage,
     String? Function()? contactErrorMessage,
     ProblemDetails? Function()? problemDetails,
+    FavoriteStatus? favoriteStatus,
+    bool? isFavorite,
+    String? Function()? favoriteErrorMessage,
   }) {
     return ProductDetailState(
       status: status ?? this.status,
@@ -72,6 +83,11 @@ final class ProductDetailState extends Equatable {
       problemDetails: problemDetails != null
           ? problemDetails()
           : this.problemDetails,
+      favoriteStatus: favoriteStatus ?? this.favoriteStatus,
+      isFavorite: isFavorite ?? this.isFavorite,
+      favoriteErrorMessage: favoriteErrorMessage != null
+          ? favoriteErrorMessage()
+          : this.favoriteErrorMessage,
     );
   }
 
@@ -86,5 +102,8 @@ final class ProductDetailState extends Equatable {
     errorMessage,
     contactErrorMessage,
     problemDetails,
+    favoriteStatus,
+    isFavorite,
+    favoriteErrorMessage,
   ];
 }
