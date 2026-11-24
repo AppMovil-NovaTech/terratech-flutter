@@ -167,6 +167,14 @@ class _CatalogScreenState extends State<CatalogScreen> {
               actions: <Widget>[
                 if (widget.canShowNotifications)
                   IconButton(
+                    key: const Key('us31_open_preferences_button'),
+                    tooltip: 'Mis preferencias de productos',
+                    icon: const Icon(Icons.tune_outlined),
+                    onPressed: () => Navigator.of(context)
+                        .pushNamed(AppRoutes.productPreferences),
+                  ),
+                if (widget.canShowNotifications)
+                  IconButton(
                     key: const Key('us32_open_notifications_button'),
                     tooltip: 'Mis notificaciones',
                     icon: const Icon(Icons.notifications_outlined),
