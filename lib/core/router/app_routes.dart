@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../commercial/data/commercial_remote_datasource.dart';
 import '../../commercial/data/product_interest_auth_service.dart';
+import '../../commercial/data/product_favorites_repository_impl.dart';
+import '../../commercial/data/product_notifications_repository_impl.dart';
+import '../../commercial/presentation/product_notifications_screen.dart';
 import '../../commercial/domain/commercial_repository.dart';
 import '../../commercial/domain/product.dart';
 import '../../commercial/presentation/catalog_screen.dart';
@@ -22,6 +25,7 @@ abstract final class AppRoutes {
   static const String commercial = '/commercial';
   static const String productDetail = '/commercial/product-detail';
   static const String productInterest = '/commercial/product-interest';
+  static const String productNotifications = '/commercial/product-notifications';
   static const String community = '/community';
 }
 
@@ -48,7 +52,21 @@ abstract final class AppRouter {
       ),
       AppRoutes.commercial => MaterialPageRoute<void>(
         settings: settings,
-        builder: (_) => CatalogScreen(repository: commercialRepository),
+        builder: (_) => CatalogScreen(
+          repository: commercialRepository,
+          favoritesRepository: dioClient == null
+              ? null
+              : ProductFavoritesRepositoryImpl(dioClient: dioClient),
+          canShowNotifications: dioClient != null,
+        ),
+      ),
+      AppRoutes.productNotifications => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => dioClient == null
+            ? const AppShellPlaceholder(title: 'Notificaciones no disponibles')
+            : ProductNotificationsScreen(
+                repository: ProductNotificationsRepositoryImpl(dioClient: dioClient),
+              ),
       ),
       AppRoutes.productDetail => MaterialPageRoute<void>(
         settings: settings,
@@ -69,6 +87,9 @@ abstract final class AppRouter {
             productId: productId,
             initialProduct: initialProduct,
             repository: commercialRepository,
+            favoritesRepository: dioClient == null
+                ? null
+                : ProductFavoritesRepositoryImpl(dioClient: dioClient),
           );
         },
       ),

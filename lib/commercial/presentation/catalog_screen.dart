@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../data/commercial_remote_datasource.dart';
 import '../domain/commercial_repository.dart';
+import '../domain/product_favorites_repository.dart';
 import '../domain/product.dart';
 import 'catalog_bloc.dart';
 import 'catalog_event.dart';
@@ -27,10 +28,14 @@ class CatalogScreen extends StatefulWidget {
     super.key,
     required this.repository,
     this.bloc,
+    this.favoritesRepository,
+    this.canShowNotifications = false,
   });
 
   final CommercialRepository repository;
   final CatalogBloc? bloc;
+  final ProductFavoritesRepository? favoritesRepository;
+  final bool canShowNotifications;
 
   @override
   State<CatalogScreen> createState() => _CatalogScreenState();
@@ -75,6 +80,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
           productId: product.id,
           initialProduct: product,
           repository: widget.repository,
+          favoritesRepository: widget.favoritesRepository,
         ),
       ),
     );
@@ -159,6 +165,14 @@ class _CatalogScreenState extends State<CatalogScreen> {
                 ],
               ),
               actions: <Widget>[
+                if (widget.canShowNotifications)
+                  IconButton(
+                    key: const Key('us32_open_notifications_button'),
+                    tooltip: 'Mis notificaciones',
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () => Navigator.of(context)
+                        .pushNamed(AppRoutes.productNotifications),
+                  ),
                 IconButton(
                   key: const Key('catalog_toggle_view_button'),
                   tooltip: _isGridView

@@ -51,3 +51,22 @@ final class ContactFarmerSubmitted extends ProductDetailEvent {
 final class ContactFarmerStatusReset extends ProductDetailEvent {
   const ContactFarmerStatusReset();
 }
+
+/// Loads the current user's favorite status for the displayed product (US32).
+final class FavoriteStatusRequested extends ProductDetailEvent {
+  const FavoriteStatusRequested(this.productId);
+  final int productId;
+  @override
+  List<Object?> get props => <Object?>[productId];
+}
+
+final class FavoriteToggleRequested extends ProductDetailEvent {
+  const FavoriteToggleRequested(this.productId);
+  final int productId;
+  @override
+  List<Object?> get props => <Object?>[productId];
+}
+
+final class FavoriteFeedbackDismissed extends ProductDetailEvent {
+  const FavoriteFeedbackDismissed();
+}
