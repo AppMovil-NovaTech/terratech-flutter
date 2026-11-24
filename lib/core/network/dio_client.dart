@@ -17,7 +17,9 @@ class DioClient {
     Duration receiveTimeout = defaultTimeout,
     Duration sendTimeout = defaultTimeout,
     Dio? dio,
+    void Function()? onUnauthorized,
   }) {
+    _onUnauthorized = onUnauthorized;
     final resolvedBaseUrl = (baseUrl ?? EnvConfig.apiBaseUrl).trim();
 
     _dio =
@@ -38,15 +40,20 @@ class DioClient {
 
     _dio.interceptors.addAll(<Interceptor>[
       AuthInterceptor(secureStorage: secureStorage),
-      const ErrorInterceptor(),
+      ErrorInterceptor(onUnauthorized: () => _onUnauthorized?.call()),
     ]);
   }
 
   static const Duration defaultTimeout = Duration(seconds: 15);
 
   late final Dio _dio;
+  void Function()? _onUnauthorized;
+
+  /// Registers or replaces the callback triggered when protected requests
+  /// receive HTTP `401 Unauthorized`.
+  set onUnauthorized(void Function()? callback) => _onUnauthorized = callback;
 
   /// Underlying configured [Dio] instance for consumption by bounded-context
-  /// remote data sources (`commercial` and `community`).
+  /// remote data sources (`iam`, `commercial`, and `community`).
   Dio get dio => _dio;
 }
