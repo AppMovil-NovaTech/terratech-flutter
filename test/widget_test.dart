@@ -7,6 +7,8 @@ import 'package:terratech_mobile/core/network/auth_interceptor.dart';
 import 'package:terratech_mobile/core/network/dio_client.dart';
 import 'package:terratech_mobile/core/network/error_interceptor.dart';
 import 'package:terratech_mobile/core/storage/secure_storage.dart';
+import 'package:terratech_mobile/iam/data/datasources/auth_session_local_datasource.dart';
+import 'package:terratech_mobile/iam/domain/entities/auth_session.dart';
 
 class _InMemorySecureStorage implements SecureStorage {
   final Map<String, String> _store = <String, String>{};
@@ -36,7 +38,7 @@ class _InMemorySecureStorage implements SecureStorage {
 }
 
 void main() {
-  group('Core infrastructure tests', () {
+  group('Core infrastructure & App startup tests', () {
     test('EnvConfig.validate throws when API_BASE_URL is empty', () {
       expect(() => EnvConfig.validate(''), throwsStateError);
     });
@@ -88,19 +90,56 @@ void main() {
       expect(problem.detail, 'No product exists with ID 42.');
     });
 
-    testWidgets('TerraTechApp renders initial route', (tester) async {
-      final storage = _InMemorySecureStorage();
-      final dioClient = DioClient(
-        secureStorage: storage,
-        baseUrl: 'https://api.example.com',
-      );
+    testWidgets(
+      'TerraTechApp renders WelcomeScreen when no active session exists',
+      (tester) async {
+        final storage = _InMemorySecureStorage();
+        final dioClient = DioClient(
+          secureStorage: storage,
+          baseUrl: 'https://api.example.com',
+        );
 
-      await tester.pumpWidget(
-        TerraTechApp(secureStorage: storage, dioClient: dioClient),
-      );
+        await tester.pumpWidget(
+          TerraTechApp(secureStorage: storage, dioClient: dioClient),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('TerraTech Home'), findsWidgets);
-    });
+        expect(find.text('Iniciar sesión'), findsOneWidget);
+        expect(find.text('Crear cuenta'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'TerraTechApp restores valid session and renders TerraTechHomeShell',
+      (tester) async {
+        final storage = _InMemorySecureStorage();
+        final localSession = AuthSessionLocalDataSource(secureStorage: storage);
+        await localSession.saveSession(
+          AuthSession(
+            userId: 7,
+            emailAddress: 'angel@terratech.pe',
+            fullName: 'Angel Pariona',
+            token: 'valid-jwt-token',
+            expiresAt: DateTime.now().toUtc().add(const Duration(hours: 2)),
+          ),
+        );
+        final dioClient = DioClient(
+          secureStorage: storage,
+          baseUrl: 'https://api.example.com',
+        );
+
+        await tester.pumpWidget(
+          TerraTechApp(secureStorage: storage, dioClient: dioClient),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('TerraTech Home'), findsOneWidget);
+        expect(
+          find.text('Sesión activa: Angel Pariona (angel@terratech.pe)'),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }
 

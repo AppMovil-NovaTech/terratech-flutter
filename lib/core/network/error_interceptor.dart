@@ -7,11 +7,22 @@ import '../errors/problem_details.dart';
 /// Intercepts [DioException] errors and normalizes them into RFC 7807
 /// [ProblemDetails] objects attached to `DioException.error`.
 class ErrorInterceptor extends Interceptor {
-  const ErrorInterceptor();
+  const ErrorInterceptor({this.onUnauthorized});
+
+  /// Optional callback notified when a protected endpoint returns HTTP `401`.
+  final void Function()? onUnauthorized;
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     final problemDetails = _mapToProblemDetails(err);
+    final path = err.requestOptions.path.toLowerCase();
+    final isAuthCredentialAttempt =
+        path.contains('/authentication/sign-in') ||
+        path.contains('/authentication/sign-up');
+
+    if (problemDetails.status == 401 && !isAuthCredentialAttempt) {
+      onUnauthorized?.call();
+    }
 
     handler.next(
       err.copyWith(

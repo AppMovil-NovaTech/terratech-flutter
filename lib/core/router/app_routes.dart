@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
 
 import '../../commercial/data/commercial_remote_datasource.dart';
-import '../../commercial/data/product_interest_auth_service.dart';
 import '../../commercial/data/product_favorites_repository_impl.dart';
+import '../../commercial/data/product_interest_auth_service.dart';
 import '../../commercial/data/product_notifications_repository_impl.dart';
 import '../../commercial/data/product_preferences_repository_impl.dart';
-import '../../commercial/presentation/product_preferences_screen.dart';
-import '../../commercial/presentation/product_notifications_screen.dart';
 import '../../commercial/domain/commercial_repository.dart';
 import '../../commercial/domain/product.dart';
 import '../../commercial/presentation/catalog_screen.dart';
 import '../../commercial/presentation/product_detail_screen.dart';
 import '../../commercial/presentation/product_interest_screen.dart';
+import '../../commercial/presentation/product_notifications_screen.dart';
+import '../../commercial/presentation/product_preferences_screen.dart';
 import '../../features/community/presentation/screens/product_reviews_screen.dart';
+import '../../iam/domain/repositories/iam_repository.dart';
+import '../../iam/presentation/bloc/auth_bloc.dart';
+import '../../iam/presentation/bloc/auth_event.dart';
+import '../../iam/presentation/screens/forgot_password_screen.dart';
+import '../../iam/presentation/screens/profile_screen.dart';
+import '../../iam/presentation/screens/sign_in_screen.dart';
+import '../../iam/presentation/screens/sign_up_screen.dart';
+import '../../iam/presentation/screens/terms_and_conditions_screen.dart';
+import '../../iam/presentation/screens/welcome_screen.dart';
 import '../network/dio_client.dart';
 import '../storage/secure_storage.dart';
 import '../theme/app_colors.dart';
@@ -24,6 +33,12 @@ export '../../features/community/presentation/screens/product_reviews_screen.dar
 /// Named route constants for the application and its bounded contexts.
 abstract final class AppRoutes {
   static const String home = '/';
+  static const String welcome = '/auth/welcome';
+  static const String signIn = '/auth/sign-in';
+  static const String signUp = '/auth/sign-up';
+  static const String forgotPassword = '/auth/forgot-password';
+  static const String terms = '/auth/terms';
+  static const String profile = '/profile';
   static const String commercial = '/commercial';
   static const String productDetail = '/commercial/product-detail';
   static const String productInterest = '/commercial/product-interest';
@@ -45,6 +60,7 @@ abstract final class AppRouter {
   static Route<dynamic> onGenerateRoute(
     RouteSettings settings, {
     required CommercialRepository commercialRepository,
+    IamRepository? iamRepository,
     DioClient? dioClient,
     SecureStorage? secureStorage,
   }) {
@@ -52,6 +68,32 @@ abstract final class AppRouter {
       AppRoutes.home => MaterialPageRoute<void>(
         settings: settings,
         builder: (_) => const TerraTechHomeShell(),
+      ),
+      AppRoutes.welcome => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => const WelcomeScreen(),
+      ),
+      AppRoutes.signIn => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => const SignInScreen(),
+      ),
+      AppRoutes.signUp => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => const SignUpScreen(),
+      ),
+      AppRoutes.forgotPassword => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => const ForgotPasswordScreen(),
+      ),
+      AppRoutes.terms => MaterialPageRoute<bool>(
+        settings: settings,
+        builder: (_) => const TermsAndConditionsScreen(),
+      ),
+      AppRoutes.profile => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => iamRepository == null
+            ? const AppShellPlaceholder(title: 'Perfil no disponible')
+            : ProfileScreen(repository: iamRepository),
       ),
       AppRoutes.commercial => MaterialPageRoute<void>(
         settings: settings,
@@ -120,13 +162,15 @@ abstract final class AppRouter {
       ),
       AppRoutes.community => MaterialPageRoute<void>(
         settings: settings,
-        builder: (_) {
+        builder: (context) {
+          final sessionUserId =
+              maybeAuthBloc(context)?.state.session?.userId;
           final args = settings.arguments;
           if (args is CommunityScreenArgs) {
             return ProductReviewsScreen(
               productId: args.productId,
               targetProfileId: args.targetProfileId,
-              currentUserId: args.currentUserId,
+              currentUserId: args.currentUserId ?? sessionUserId,
               productOwnerUserId: args.productOwnerUserId,
               productName: args.productName,
               dioClient: dioClient,
@@ -138,6 +182,7 @@ abstract final class AppRouter {
               targetProfileId: (args['targetProfileId'] as num?)?.toInt() ?? 1,
               currentUserId:
                   (args['currentUserId'] as num?)?.toInt() ??
+                  sessionUserId ??
                   MockAuthSession.testUserId,
               productOwnerUserId: (args['productOwnerUserId'] as num?)?.toInt(),
               productName: args['productName'] as String?,
@@ -147,7 +192,7 @@ abstract final class AppRouter {
           return ProductReviewsScreen(
             productId: 1,
             targetProfileId: 1,
-            currentUserId: MockAuthSession.testUserId,
+            currentUserId: sessionUserId ?? MockAuthSession.testUserId,
             dioClient: dioClient,
           );
         },
@@ -160,20 +205,50 @@ abstract final class AppRouter {
   }
 }
 
-/// Main landing hub providing navigation to the Commercial and Community
-/// bounded contexts.
+/// Main landing hub providing navigation to the Commercial, Notifications,
+/// Profile, and Community bounded contexts.
 class TerraTechHomeShell extends StatelessWidget {
   const TerraTechHomeShell({super.key});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final authBloc = maybeAuthBloc(context, listen: true);
+    final session = authBloc?.state.session;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         title: const Text('TerraTech Home'),
+        actions: <Widget>[
+          if (session != null) ...<Widget>[
+            IconButton(
+              key: const Key('home_open_notifications_button'),
+              tooltip: 'Mis notificaciones',
+              icon: const Icon(Icons.notifications_outlined),
+              onPressed: () {
+                Navigator.of(context).pushNamed(AppRoutes.productNotifications);
+              },
+            ),
+            IconButton(
+              key: const Key('home_open_profile_button'),
+              tooltip: 'Mi Perfil',
+              icon: const Icon(Icons.account_circle_outlined),
+              onPressed: () {
+                Navigator.of(context).pushNamed(AppRoutes.profile);
+              },
+            ),
+            IconButton(
+              key: const Key('home_sign_out_button'),
+              tooltip: 'Cerrar sesión',
+              icon: const Icon(Icons.logout_rounded),
+              onPressed: () {
+                authBloc?.add(const AuthSignOutRequested());
+              },
+            ),
+          ],
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -223,7 +298,9 @@ class TerraTechHomeShell extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
-                    'Sesión activa: ${MockAuthSession.testUserFullName} (${MockAuthSession.testUserEmail})',
+                    session != null
+                        ? 'Sesión activa: ${session.displayName} (${session.emailAddress})'
+                        : 'Conectado a la red agroecológica TerraTech',
                     style: const TextStyle(
                       color: AppColors.whiteHigh,
                       fontSize: 13,
@@ -358,6 +435,52 @@ class TerraTechHomeShell extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Semantics(
               button: true,
+              label: 'Ir a preferencias y notificaciones de productos',
+              child: Card(
+                elevation: 0,
+                color: AppColors.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  side: const BorderSide(color: AppColors.borderSubtle),
+                ),
+                child: ListTile(
+                  key: const Key('home_navigate_preferences_card'),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.sm,
+                  ),
+                  leading: const CircleAvatar(
+                    backgroundColor: AppColors.primaryContainer,
+                    child: Icon(
+                      Icons.tune_outlined,
+                      color: AppColors.onPrimaryContainer,
+                    ),
+                  ),
+                  title: const Text(
+                    'Preferencias y nuevos productos · US31',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'Elige categorías de interés para recibir avisos automáticos.',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
+                  onTap: () {
+                    Navigator.of(context).pushNamed(AppRoutes.productPreferences);
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Semantics(
+              button: true,
               label: 'Ir a comunidad agrícola y reseñas de productores',
               child: Card(
                 elevation: 0,
@@ -397,6 +520,52 @@ class TerraTechHomeShell extends StatelessWidget {
                   ),
                   onTap: () {
                     Navigator.of(context).pushNamed(AppRoutes.community);
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Semantics(
+              button: true,
+              label: 'Ir a mi perfil agrícola y cuenta',
+              child: Card(
+                elevation: 0,
+                color: AppColors.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  side: const BorderSide(color: AppColors.borderSubtle),
+                ),
+                child: ListTile(
+                  key: const Key('home_navigate_profile_card'),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.sm,
+                  ),
+                  leading: const CircleAvatar(
+                    backgroundColor: AppColors.surfaceSubtle,
+                    child: Icon(
+                      Icons.badge_outlined,
+                      color: AppColors.primaryDark,
+                    ),
+                  ),
+                  title: const Text(
+                    'Mi Perfil Agrícola',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'Administra tus datos, finca, umbrales y sesión.',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                    color: AppColors.primaryDark,
+                  ),
+                  onTap: () {
+                    Navigator.of(context).pushNamed(AppRoutes.profile);
                   },
                 ),
               ),
