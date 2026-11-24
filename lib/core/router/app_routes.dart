@@ -4,6 +4,8 @@ import '../../commercial/data/commercial_remote_datasource.dart';
 import '../../commercial/data/product_interest_auth_service.dart';
 import '../../commercial/data/product_favorites_repository_impl.dart';
 import '../../commercial/data/product_notifications_repository_impl.dart';
+import '../../commercial/data/product_preferences_repository_impl.dart';
+import '../../commercial/presentation/product_preferences_screen.dart';
 import '../../commercial/presentation/product_notifications_screen.dart';
 import '../../commercial/domain/commercial_repository.dart';
 import '../../commercial/domain/product.dart';
@@ -26,6 +28,7 @@ abstract final class AppRoutes {
   static const String productDetail = '/commercial/product-detail';
   static const String productInterest = '/commercial/product-interest';
   static const String productNotifications = '/commercial/product-notifications';
+  static const String productPreferences = '/commercial/product-preferences';
   static const String community = '/community';
 }
 
@@ -59,6 +62,14 @@ abstract final class AppRouter {
               : ProductFavoritesRepositoryImpl(dioClient: dioClient),
           canShowNotifications: dioClient != null,
         ),
+      ),
+      AppRoutes.productPreferences => MaterialPageRoute<void>(
+        settings: settings,
+        builder: (_) => dioClient == null
+            ? const AppShellPlaceholder(title: 'Preferencias no disponibles')
+            : ProductPreferencesScreen(
+                repository: ProductPreferencesRepositoryImpl(dioClient: dioClient),
+              ),
       ),
       AppRoutes.productNotifications => MaterialPageRoute<void>(
         settings: settings,
