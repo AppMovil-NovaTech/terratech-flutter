@@ -111,23 +111,25 @@ class _SignInScreenState extends State<SignInScreen> {
                             ),
                           ),
                           const SizedBox(width: AppSpacing.md),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                'Bienvenido de nuevo',
-                                style: textTheme.titleLarge?.copyWith(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w800,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  'Bienvenido de nuevo',
+                                  style: textTheme.titleLarge?.copyWith(
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                'Tus parcelas, catálogo y alertas en un solo lugar.',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
+                                Text(
+                                  'Tus parcelas, catálogo y alertas en un solo lugar.',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -302,8 +304,9 @@ class _SignInScreenState extends State<SignInScreen> {
                               },
                         child: const Text('¿Olvidaste tu contraseña?'),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: <Widget>[
                           const Text(
                             '¿Nuevo en TerraTech?',
