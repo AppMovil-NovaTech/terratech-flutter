@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../iam/presentation/bloc/auth_bloc.dart';
 import '../../data/commercial_remote_datasource.dart';
 import '../../domain/product.dart';
 import '../product_detail_bloc.dart';
@@ -182,12 +183,23 @@ class _ContactFarmerBottomSheetState extends State<ContactFarmerBottomSheet> {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    const Text(
-                      '${MockAuthSession.testUserFullName} (${MockAuthSession.testUserEmail})',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                      ),
+                    Builder(
+                      builder: (context) {
+                        final session = maybeAuthBloc(
+                          context,
+                          listen: true,
+                        )?.state.session;
+                        final senderLabel = session != null
+                            ? '${session.displayName} (${session.emailAddress})'
+                            : '${MockAuthSession.testUserFullName} (${MockAuthSession.testUserEmail})';
+                        return Text(
+                          senderLabel,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                        );
+                      },
                     ),
                     const Divider(height: 14),
                     Text(

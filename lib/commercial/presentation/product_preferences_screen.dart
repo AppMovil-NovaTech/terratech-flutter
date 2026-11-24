@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/router/app_routes.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
 import '../domain/product_preferences_repository.dart';
 import 'product_preferences_bloc.dart';
 import 'product_preferences_event.dart';
@@ -72,6 +75,55 @@ class _ProductPreferencesScreenState extends State<ProductPreferencesScreen> {
                   : ListView(
                       padding: const EdgeInsets.all(16),
                       children: <Widget>[
+                        if (state.errorMessage != null &&
+                            (state.errorMessage!
+                                    .toLowerCase()
+                                    .contains('profile') ||
+                                state.errorMessage!
+                                    .toLowerCase()
+                                    .contains('perfil')))
+                          Container(
+                            key: const Key('us31_missing_profile_banner'),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(AppSpacing.md),
+                            decoration: BoxDecoration(
+                              color: AppColors.warningBackground,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusMd,
+                              ),
+                              border: Border.all(
+                                color: AppColors.warningBorder,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                const Text(
+                                  'Debes completar tu perfil agrícola antes de guardar preferencias de productos.',
+                                  style: TextStyle(
+                                    color: AppColors.warningForeground,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                                OutlinedButton.icon(
+                                  key: const Key('us31_complete_profile_button'),
+                                  onPressed: () async {
+                                    await Navigator.of(
+                                      context,
+                                    ).pushNamed(AppRoutes.profile);
+                                    if (mounted) {
+                                      _bloc.add(
+                                        const LoadProductPreferencesRequested(),
+                                      );
+                                    }
+                                  },
+                                  icon: const Icon(Icons.badge_outlined),
+                                  label: const Text('Completar Mi Perfil'),
+                                ),
+                              ],
+                            ),
+                          ),
                         const Text(
                           'Recibe una notificación cuando se publique un '
                           'producto de uno de los tipos que te interesan.',

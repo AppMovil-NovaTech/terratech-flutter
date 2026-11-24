@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/router/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../iam/presentation/bloc/auth_bloc.dart';
 import '../data/commercial_remote_datasource.dart';
 import '../domain/commercial_repository.dart';
 import '../domain/product_favorites_repository.dart';
@@ -94,12 +95,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _openProductReviews(BuildContext context, Product product) {
+    final currentUserId =
+        maybeAuthBloc(context)?.state.session?.userId ??
+        MockAuthSession.testUserId;
     Navigator.of(context).pushNamed(
       AppRoutes.community,
       arguments: CommunityScreenArgs(
         productId: product.id,
         targetProfileId: product.farmerProfileId,
-        currentUserId: MockAuthSession.testUserId,
+        currentUserId: currentUserId,
         productName: product.name,
       ),
     );

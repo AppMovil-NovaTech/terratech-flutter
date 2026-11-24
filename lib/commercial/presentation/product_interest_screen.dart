@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../iam/presentation/bloc/auth_bloc.dart';
+import '../../iam/presentation/bloc/auth_event.dart';
 import '../data/product_interest_auth_service.dart';
 import '../domain/commercial_repository.dart';
 import 'product_interest_bloc.dart';
@@ -159,6 +161,15 @@ class _ProductInterestScreenState extends State<ProductInterestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final globalAuthBloc = maybeAuthBloc(
+      context,
+      listen: true,
+    );
+    final globalSession = globalAuthBloc?.state.session;
+    final activeUserId = globalSession?.userId ?? _signedInUserId;
+    final activeEmail = globalSession?.emailAddress ?? _signedInEmail;
+    final isRestoring = globalSession == null && _checkingSession;
+
     return BlocProvider<ProductInterestBloc>.value(
       value: _bloc,
       child: BlocConsumer<ProductInterestBloc, ProductInterestState>(
@@ -196,8 +207,8 @@ class _ProductInterestScreenState extends State<ProductInterestScreen> {
                     'Consulta únicamente tus productos como proveedor. Necesitas una sesión autenticada.',
                   ),
                   const SizedBox(height: 16),
-                  if (_checkingSession) const LinearProgressIndicator(),
-                  if (!_checkingSession && _signedInUserId == null) ...<Widget>[
+                  if (isRestoring) const LinearProgressIndicator(),
+                  if (!isRestoring && activeUserId == null) ...<Widget>[
                     const Text(
                       'Inicia sesión como proveedor para gestionar tus productos.',
                     ),
@@ -242,18 +253,25 @@ class _ProductInterestScreenState extends State<ProductInterestScreen> {
                       ),
                     ],
                   ],
-                  if (_signedInUserId != null) ...<Widget>[
-                    Text('Proveedor autenticado: usuario $_signedInUserId'),
-                    if (_signedInEmail != null) Text(_signedInEmail!),
+                  if (activeUserId != null) ...<Widget>[
+                    Text('Proveedor autenticado: usuario $activeUserId'),
+                    if (activeEmail != null) Text(activeEmail),
                     TextButton.icon(
                       key: const Key('us29_sign_out_button'),
-                      onPressed: _signOut,
+                      onPressed: () {
+                        if (globalAuthBloc != null && globalSession != null) {
+                          globalAuthBloc.add(const AuthSignOutRequested());
+                          Navigator.of(context).popUntil((r) => r.isFirst);
+                        } else {
+                          _signOut();
+                        }
+                      },
                       icon: const Icon(Icons.logout),
                       label: const Text('Cerrar sesión'),
                     ),
                     const SizedBox(height: 12),
                   ],
-                  if (_signedInUserId != null)
+                  if (activeUserId != null)
                     TextField(
                       key: const Key('us29_product_id'),
                       controller: _productIdController,
@@ -264,18 +282,18 @@ class _ProductInterestScreenState extends State<ProductInterestScreen> {
                       ),
                     ),
                   const SizedBox(height: 12),
-                  if (_signedInUserId != null)
+                  if (activeUserId != null)
                     FilledButton.icon(
                       key: const Key('us29_load_interest'),
                       onPressed: busy ? null : _load,
                       icon: const Icon(Icons.analytics_outlined),
                       label: const Text('Consultar estadísticas'),
                     ),
-                  if (_signedInUserId != null && busy) ...<Widget>[
+                  if (activeUserId != null && busy) ...<Widget>[
                     const SizedBox(height: 16),
                     const LinearProgressIndicator(),
                   ],
-                  if (_signedInUserId != null &&
+                  if (activeUserId != null &&
                       state.status ==
                           ProductInterestStatus.failure) ...<Widget>[
                     const SizedBox(height: 12),
@@ -287,7 +305,7 @@ class _ProductInterestScreenState extends State<ProductInterestScreen> {
                       ),
                     ),
                   ],
-                  if (_signedInUserId != null && interest != null) ...<Widget>[
+                  if (activeUserId != null && interest != null) ...<Widget>[
                     const SizedBox(height: 20),
                     Card(
                       child: Padding(

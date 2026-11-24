@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/errors/problem_details.dart';
@@ -5,11 +6,19 @@ import '../../domain/repositories/iam_repository.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
+/// Safely resolves [AuthBloc] from [context] without throwing when a screen is
+/// mounted in isolation (for example, standalone widget tests).
+AuthBloc? maybeAuthBloc(BuildContext context, {bool listen = false}) {
+  try {
+    return BlocProvider.of<AuthBloc>(context, listen: listen);
+  } catch (_) {
+    return null;
+  }
+}
+
 /// Global authentication BLoC managing session lifecycle and IAM actions.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc({required IamRepository repository})
-    : _repository = repository,
-      super(const AuthState()) {
+  AuthBloc({required this.repository}) : super(const AuthState()) {
     on<AuthRestoreRequested>(_onRestore);
     on<AuthSignInRequested>(_onSignIn);
     on<AuthSignUpRequested>(_onSignUp);
@@ -21,7 +30,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthFeedbackCleared>(_onFeedbackCleared);
   }
 
-  final IamRepository _repository;
+  final IamRepository repository;
 
   Future<void> _onRestore(
     AuthRestoreRequested event,
@@ -29,7 +38,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
     try {
-      final restored = await _repository.restoreSession();
+      final restored = await repository.restoreSession();
       if (restored != null) {
         emit(
           state.copyWith(
@@ -70,7 +79,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ),
     );
     try {
-      final session = await _repository.signIn(
+      final session = await repository.signIn(
         emailAddress: event.emailAddress,
         password: event.password,
       );
@@ -120,7 +129,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ),
     );
     try {
-      final result = await _repository.signUp(
+      final result = await repository.signUp(
         fullName: event.fullName,
         emailAddress: event.emailAddress,
         password: event.password,
@@ -171,7 +180,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ),
     );
     try {
-      final message = await _repository.requestPasswordReset(
+      final message = await repository.requestPasswordReset(
         emailAddress: event.emailAddress,
       );
       emit(
@@ -214,7 +223,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ),
     );
     try {
-      await _repository.resetPassword(
+      await repository.resetPassword(
         token: event.token,
         password: event.password,
         confirmPassword: event.confirmPassword,
@@ -258,7 +267,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (state.status == AuthStatus.unauthenticated && !state.isAuthenticated) {
       return;
     }
-    await _repository.signOut();
+    await repository.signOut();
     emit(
       const AuthState(
         status: AuthStatus.unauthenticated,
@@ -273,7 +282,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(state.copyWith(isBusy: true, clearError: true, clearInfo: true));
-    await _repository.signOut();
+    await repository.signOut();
     emit(
       const AuthState(
         status: AuthStatus.unauthenticated,

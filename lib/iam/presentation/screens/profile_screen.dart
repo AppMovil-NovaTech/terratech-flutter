@@ -59,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.didChangeDependencies();
     if (!_hydratedFromSession) {
       _hydratedFromSession = true;
-      final session = BlocProvider.maybeOf<AuthBloc>(context)?.state.session;
+      final session = maybeAuthBloc(context)?.state.session;
       if (session != null && _fullNameController.text.isEmpty) {
         _fullNameController.text = session.fullName;
       }
@@ -118,7 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authBloc = BlocProvider.maybeOf<AuthBloc>(context);
+    final authBloc = maybeAuthBloc(context);
     final session = authBloc?.state.session;
 
     return BlocProvider<ProfileBloc>.value(

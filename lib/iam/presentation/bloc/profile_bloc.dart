@@ -7,14 +7,12 @@ import 'profile_state.dart';
 
 /// BLoC managing `/api/v1/profiles/me` (US09 & prerequisite for US31/US32 alerts).
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
-  ProfileBloc({required IamRepository repository})
-    : _repository = repository,
-      super(const ProfileState()) {
+  ProfileBloc({required this.repository}) : super(const ProfileState()) {
     on<LoadMyProfileRequested>(_onLoad);
     on<SaveMyProfileRequested>(_onSave);
   }
 
-  final IamRepository _repository;
+  final IamRepository repository;
 
   Future<void> _onLoad(
     LoadMyProfileRequested event,
@@ -28,7 +26,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       ),
     );
     try {
-      final profile = await _repository.getMyProfile();
+      final profile = await repository.getMyProfile();
       if (profile == null) {
         emit(
           state.copyWith(
@@ -73,7 +71,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       ),
     );
     try {
-      final saved = await _repository.upsertMyProfile(event.input);
+      final saved = await repository.upsertMyProfile(event.input);
       emit(
         state.copyWith(
           status: ProfileStatus.loaded,

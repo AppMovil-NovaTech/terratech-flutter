@@ -1,5 +1,5 @@
-import 'auth_session.dart';
-import 'user_profile.dart';
+import '../entities/auth_session.dart';
+import '../entities/user_profile.dart';
 
 /// Result returned when registering a new TerraTech account (US06).
 class SignUpResult {
