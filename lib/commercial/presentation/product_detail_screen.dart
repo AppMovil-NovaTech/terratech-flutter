@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/router/app_routes.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../iam/presentation/bloc/auth_bloc.dart';
 import '../data/commercial_remote_datasource.dart';
 import '../domain/commercial_repository.dart';
+import '../domain/product_favorites_repository.dart';
 import '../domain/product.dart';
 import '../domain/traceability.dart';
 import 'product_detail_bloc.dart';
@@ -30,12 +34,14 @@ class ProductDetailScreen extends StatefulWidget {
     required this.repository,
     this.initialProduct,
     this.bloc,
+    this.favoritesRepository,
   });
 
   final int productId;
   final CommercialRepository repository;
   final Product? initialProduct;
   final ProductDetailBloc? bloc;
+  final ProductFavoritesRepository? favoritesRepository;
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -52,7 +58,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     super.initState();
     _ownsBloc = widget.bloc == null;
     _detailBloc =
-        widget.bloc ?? ProductDetailBloc(repository: widget.repository);
+        widget.bloc ?? ProductDetailBloc(
+          repository: widget.repository,
+          favoritesRepository: widget.favoritesRepository,
+        );
     if (_detailBloc.state.status == ProductDetailStatus.initial) {
       _detailBloc.add(
         LoadProductDetailRequested(
@@ -86,12 +95,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _openProductReviews(BuildContext context, Product product) {
+    final currentUserId =
+        maybeAuthBloc(context)?.state.session?.userId ??
+        MockAuthSession.testUserId;
     Navigator.of(context).pushNamed(
       AppRoutes.community,
       arguments: CommunityScreenArgs(
         productId: product.id,
         targetProfileId: product.farmerProfileId,
-        currentUserId: MockAuthSession.testUserId,
+        currentUserId: currentUserId,
         productName: product.name,
       ),
     );
@@ -125,8 +137,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       value: _detailBloc,
       child: BlocConsumer<ProductDetailBloc, ProductDetailState>(
         listenWhen: (previous, current) =>
-            previous.contactStatus != current.contactStatus,
+            previous.contactStatus != current.contactStatus ||
+            previous.favoriteErrorMessage != current.favoriteErrorMessage,
         listener: (context, state) {
+          if (state.favoriteErrorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.favoriteErrorMessage!)),
+            );
+            _detailBloc.add(const FavoriteFeedbackDismissed());
+          }
           if (state.contactStatus == ContactFarmerStatus.sent &&
               state.lastContactResult != null) {
             final result = state.lastContactResult!;
@@ -167,6 +186,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 overflow: TextOverflow.ellipsis,
               ),
               actions: <Widget>[
+                if (product != null && widget.favoritesRepository != null)
+                  state.favoriteStatus == FavoriteStatus.loading ||
+                      state.favoriteStatus == FavoriteStatus.saving
+                      ? const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: SizedBox(
+                            width: 22, height: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
+                      : IconButton(
+                          key: const Key('us32_favorite_toggle_button'),
+                          tooltip: state.isFavorite
+                              ? 'Quitar de favoritos'
+                              : 'Agregar a favoritos',
+                          icon: Icon(state.isFavorite
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded),
+                          onPressed: () => _detailBloc.add(
+                            FavoriteToggleRequested(product.id),
+                          ),
+                        ),
                 if (product != null)
                   IconButton(
                     key: const Key('verify_qr_traceability_appbar_button'),
@@ -304,7 +345,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     traceability,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 SectionContainerCard(
                   title: 'Opiniones y Reputación de Compradores',
                   icon: Icons.reviews_outlined,
@@ -315,14 +356,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         children: <Widget>[
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFFF8E1),
-                              borderRadius: BorderRadius.circular(12),
+                              color: AppColors.starBadgeBackground,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusMd,
+                              ),
                               border: Border.all(
-                                color: const Color(0xFFFFE082),
+                                color: AppColors.starBadgeBorder,
                               ),
                             ),
                             child: Row(
@@ -330,10 +373,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               children: <Widget>[
                                 const Icon(
                                   Icons.star_rounded,
-                                  color: Color(0xFFF9A825),
+                                  color: AppColors.starAmber,
                                   size: 22,
                                 ),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: AppSpacing.xs),
                                 Text(
                                   product.averageRating.toStringAsFixed(1),
                                   style: Theme.of(context)
@@ -341,13 +384,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       .titleMedium
                                       ?.copyWith(
                                         fontWeight: FontWeight.w800,
-                                        color: const Color(0xFF5D4037),
+                                        color: AppColors.starBadgeText,
                                       ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.md),
                           Expanded(
                             child: Text(
                               'Basado en ${product.reviewCount} reseñas verificadas de compradores en la comunidad TerraTech.',

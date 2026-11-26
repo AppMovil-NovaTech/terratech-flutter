@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+
 /// Empty-state view displayed when no catalog products match the active
 /// search or filter criteria.
 class CatalogEmptyResultView extends StatelessWidget {
@@ -14,41 +17,40 @@ class CatalogEmptyResultView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(28),
+        padding: const EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(
+            const Icon(
               Icons.search_off_rounded,
               size: 56,
-              color: colorScheme.onSurfaceVariant,
+              color: AppColors.textMuted,
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: AppSpacing.md),
             Text(
               hasActiveFilters
                   ? 'No se encontraron productos para los filtros seleccionados'
                   : 'El catálogo aún no tiene productos registrados',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               hasActiveFilters
                   ? 'Intenta ajustar la categoría, la región de origen o el término de búsqueda.'
                   : 'Cuando los agricultores registren lotes en TerraTech aparecerán aquí.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+                color: AppColors.textSecondary,
               ),
             ),
             if (hasActiveFilters) ...<Widget>[
-              const SizedBox(height: 18),
+              const SizedBox(height: AppSpacing.lg),
               FilledButton.tonalIcon(
                 key: const Key('empty_state_clear_filters_button'),
                 onPressed: onClearFilters,
@@ -77,35 +79,34 @@ class CatalogErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(28),
+        padding: const EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(
+            const Icon(
               Icons.cloud_off_rounded,
               size: 54,
-              color: colorScheme.error,
+              color: AppColors.error,
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: AppSpacing.md),
             Text(
               'Error al cargar el catálogo',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               message,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+                color: AppColors.textSecondary,
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: AppSpacing.lg),
             FilledButton.icon(
               key: const Key('catalog_retry_button'),
               onPressed: onRetry,

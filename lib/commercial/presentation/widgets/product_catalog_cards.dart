@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../domain/product.dart';
 
 /// Grid card displaying a catalog product's image, name, price, origin region,
@@ -23,7 +25,7 @@ class ProductGridCard extends StatelessWidget {
       elevation: 1,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         side: BorderSide(color: colorScheme.outlineVariant),
       ),
       child: InkWell(
@@ -42,16 +44,16 @@ class ProductGridCard extends StatelessWidget {
                     category: product.category,
                   ),
                   Positioned(
-                    top: 8,
-                    left: 8,
+                    top: AppSpacing.sm,
+                    left: AppSpacing.sm,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.68),
-                        borderRadius: BorderRadius.circular(20),
+                        color: AppColors.overlayDark,
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -59,13 +61,13 @@ class ProductGridCard extends StatelessWidget {
                           const Icon(
                             Icons.location_on,
                             size: 12,
-                            color: Colors.lightGreenAccent,
+                            color: AppColors.locationPinAccent,
                           ),
-                          const SizedBox(width: 3),
+                          const SizedBox(width: AppSpacing.xxs),
                           Text(
                             product.originRegion,
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: AppColors.surface,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
@@ -75,16 +77,16 @@ class ProductGridCard extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    top: 8,
-                    right: 8,
+                    top: AppSpacing.sm,
+                    right: AppSpacing.sm,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 7,
-                        vertical: 3,
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xxs,
                       ),
                       decoration: BoxDecoration(
-                        color: colorScheme.surface.withValues(alpha: 0.92),
-                        borderRadius: BorderRadius.circular(16),
+                        color: AppColors.whiteHigh,
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -92,9 +94,9 @@ class ProductGridCard extends StatelessWidget {
                           const Icon(
                             Icons.star_rounded,
                             size: 14,
-                            color: Color(0xFFF9A825),
+                            color: AppColors.starAmber,
                           ),
-                          const SizedBox(width: 2),
+                          const SizedBox(width: AppSpacing.xxs),
                           Text(
                             product.averageRating.toStringAsFixed(1),
                             style: TextStyle(
@@ -240,17 +242,17 @@ class ProductListTileCard extends StatelessWidget {
       elevation: 1,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         side: BorderSide(color: colorScheme.outlineVariant),
       ),
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             children: <Widget>[
               ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 child: SizedBox(
                   width: 96,
                   height: 96,
@@ -260,7 +262,7 @@ class ProductListTileCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,12 +271,14 @@ class ProductListTileCard extends StatelessWidget {
                       children: <Widget>[
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
+                            horizontal: AppSpacing.sm,
+                            vertical: AppSpacing.xxs,
                           ),
                           decoration: BoxDecoration(
                             color: colorScheme.secondaryContainer,
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusSm,
+                            ),
                           ),
                           child: Text(
                             product.category,
@@ -289,9 +293,9 @@ class ProductListTileCard extends StatelessWidget {
                         const Icon(
                           Icons.star_rounded,
                           size: 16,
-                          color: Color(0xFFF9A825),
+                          color: AppColors.starAmber,
                         ),
-                        const SizedBox(width: 3),
+                        const SizedBox(width: AppSpacing.xxs),
                         Text(
                           product.averageRating.toStringAsFixed(1),
                           style: const TextStyle(

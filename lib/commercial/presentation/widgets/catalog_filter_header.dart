@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../catalog_state.dart';
 
 /// Header bar containing the real-time product name search field (US39 Scenario 3)
@@ -26,16 +28,19 @@ class CatalogFilterHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceSubtle,
         border: Border(
-          bottom: BorderSide(color: colorScheme.outlineVariant),
+          bottom: BorderSide(color: AppColors.borderSubtle),
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -47,9 +52,9 @@ class CatalogFilterHeader extends StatelessWidget {
             decoration: InputDecoration(
               hintText:
                   'Buscar producto por nombre (ej. Papa, Quinua, Café)...',
-              prefixIcon: Icon(
+              prefixIcon: const Icon(
                 Icons.search_rounded,
-                color: colorScheme.primary,
+                color: AppColors.primary,
               ),
               suffixIcon: state.searchQuery.isNotEmpty
                   ? IconButton(
@@ -60,29 +65,29 @@ class CatalogFilterHeader extends StatelessWidget {
                     )
                   : null,
               filled: true,
-              fillColor: colorScheme.surface,
+              fillColor: AppColors.surface,
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: colorScheme.outlineVariant),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: const BorderSide(color: AppColors.borderSubtle),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: colorScheme.outlineVariant),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: const BorderSide(color: AppColors.borderSubtle),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(
-                  color: colorScheme.primary,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
                   width: 1.8,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           Row(
             children: <Widget>[
               Expanded(
@@ -96,7 +101,7 @@ class CatalogFilterHeader extends StatelessWidget {
                   onChanged: onCategorySelected,
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: CatalogFilterDropdownField(
                   fieldKey: const Key('catalog_region_dropdown'),
@@ -110,20 +115,20 @@ class CatalogFilterHeader extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Row(
             children: <Widget>[
-              Icon(
+              const Icon(
                 Icons.verified_outlined,
                 size: 15,
-                color: colorScheme.primary,
+                color: AppColors.primary,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(
                   'Mostrando ${state.filteredProducts.length} de ${state.allProducts.length} productos con trazabilidad TerraTech',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                    color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -134,7 +139,9 @@ class CatalogFilterHeader extends StatelessWidget {
                   onPressed: onClearAllFilters,
                   style: TextButton.styleFrom(
                     visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                    ),
                   ),
                   icon: const Icon(Icons.filter_alt_off_rounded, size: 16),
                   label: const Text('Limpiar filtros'),
@@ -178,16 +185,16 @@ class CatalogFilterDropdownField extends StatelessWidget {
 
     return Container(
       height: 44,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       decoration: BoxDecoration(
         color: effectiveValue != null
             ? colorScheme.primaryContainer.withValues(alpha: 0.55)
-            : colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+            : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         border: Border.all(
           color: effectiveValue != null
-              ? colorScheme.primary
-              : colorScheme.outlineVariant,
+              ? AppColors.primary
+              : AppColors.borderSubtle,
         ),
       ),
       child: DropdownButtonHideUnderline(

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:terratech_mobile/commercial/data/commercial_remote_datasource.dart';
 import 'package:terratech_mobile/commercial/data/product_model.dart';
 import 'package:terratech_mobile/commercial/domain/commercial_repository.dart';
+import 'package:terratech_mobile/commercial/domain/product_interest.dart';
 import 'package:terratech_mobile/commercial/domain/product.dart';
 import 'package:terratech_mobile/commercial/domain/traceability.dart';
 import 'package:terratech_mobile/commercial/presentation/product_detail_screen.dart';
@@ -43,6 +44,29 @@ class _FakeCommercialRepository implements CommercialRepository {
 
   final Product product;
 
+  // US29: widget tests simulate a successful consultation without network calls.
+  @override
+  Future<void> registerProductConsultation(int productId) async {}
+
+  // These owner-only operations are not exercised by these existing tests.
+  @override
+  Future<ProductInterest> getProductInterest(int productId) async {
+    throw UnimplementedError('US29 interest is not used by this fake.');
+  }
+
+  @override
+  Future<ProductInterest> updateProductInterestThreshold(
+    int productId,
+    int threshold,
+  ) async {
+    throw UnimplementedError('US29 threshold is not used by this fake.');
+  }
+
+  @override
+  Future<void> checkProductInactivity(int productId) async {
+    throw UnimplementedError('US29 inactivity is not used by this fake.');
+  }
+
   @override
   Future<List<Product>> getProducts({
     String? category,
@@ -77,14 +101,17 @@ class _FakeCommercialRepository implements CommercialRepository {
 
 void main() {
   group('Community Route & MockAuthSession Integration Tests', () {
-    test('CommunityScreenArgs defaults align with MockAuthSession.testUserId', () {
-      const args = CommunityScreenArgs();
-      expect(args.productId, equals(1));
-      expect(args.targetProfileId, equals(1));
-      expect(args.currentUserId, equals(MockAuthSession.testUserId));
-      expect(args.currentUserId, equals(1));
-      expect(args.productName, isNull);
-    });
+    test(
+      'CommunityScreenArgs defaults align with MockAuthSession.testUserId',
+      () {
+        const args = CommunityScreenArgs();
+        expect(args.productId, equals(1));
+        expect(args.targetProfileId, equals(1));
+        expect(args.currentUserId, equals(MockAuthSession.testUserId));
+        expect(args.currentUserId, equals(1));
+        expect(args.productName, isNull);
+      },
+    );
 
     testWidgets(
       'ProductDetailScreen navigates to AppRoutes.community with CommunityScreenArgs and MockAuthSession.testUserId',
@@ -160,10 +187,7 @@ void main() {
 
         expect(find.byType(ProductReviewsScreen), findsOneWidget);
         expect(find.text('Opiniones y Reputación'), findsOneWidget);
-        expect(
-          find.text('Café Especial Arábica Chanchamayo'),
-          findsWidgets,
-        );
+        expect(find.text('Café Especial Arábica Chanchamayo'), findsWidgets);
       },
     );
   });

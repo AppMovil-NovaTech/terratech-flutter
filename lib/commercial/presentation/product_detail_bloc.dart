@@ -2,21 +2,32 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/errors/problem_details.dart';
 import '../domain/commercial_repository.dart';
+import '../domain/product_favorites_repository.dart';
 import 'product_detail_event.dart';
 import 'product_detail_state.dart';
 
 /// BLoC managing Product Detail, Traceability Inquiry, and Farmer Contact
 /// workflows (US40 - Scenarios 1, 2, and 3).
 class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
-  ProductDetailBloc({required this.repository})
+  ProductDetailBloc({required this.repository, this.favoritesRepository})
     : super(const ProductDetailState()) {
     on<LoadProductDetailRequested>(_onLoadProductDetailRequested);
     on<TraceabilityInquiryRequested>(_onTraceabilityInquiryRequested);
     on<ContactFarmerSubmitted>(_onContactFarmerSubmitted);
     on<ContactFarmerStatusReset>(_onContactFarmerStatusReset);
+    on<FavoriteStatusRequested>(_onFavoriteStatusRequested);
+    on<FavoriteToggleRequested>(_onFavoriteToggleRequested);
+    on<FavoriteFeedbackDismissed>((event, emit) {
+      emit(state.copyWith(favoriteErrorMessage: () => null));
+    });
   }
 
   final CommercialRepository repository;
+  final ProductFavoritesRepository? favoritesRepository;
+
+  // A consultation represents one successful opening of this detail screen,
+  // not every product GET (traceability also reloads product data).
+  bool _consultationAttempted = false;
 
   Future<void> _onLoadProductDetailRequested(
     LoadProductDetailRequested event,
@@ -50,6 +61,21 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
           problemDetails: () => null,
         ),
       );
+
+      if (favoritesRepository != null &&
+          state.favoriteStatus == FavoriteStatus.unavailable) {
+        add(FavoriteStatusRequested(event.productId));
+      }
+
+      if (!_consultationAttempted) {
+        _consultationAttempted = true;
+        try {
+          await repository.registerProductConsultation(event.productId);
+        } catch (_) {
+          // A metrics endpoint failure must not prevent product viewing.
+          // At most one attempt is made per detail-screen BLoC instance.
+        }
+      }
     } on ProblemDetails catch (problem) {
       if (state.product != null) {
         return;
@@ -160,5 +186,81 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
         contactErrorMessage: () => null,
       ),
     );
+  }
+
+  Future<void> _onFavoriteStatusRequested(
+    FavoriteStatusRequested event,
+    Emitter<ProductDetailState> emit,
+  ) async {
+    final favorites = favoritesRepository;
+    if (favorites == null) return;
+    emit(state.copyWith(favoriteStatus: FavoriteStatus.loading));
+    try {
+      final isFavorite = await favorites.isFavorite(event.productId);
+      emit(
+        state.copyWith(
+          favoriteStatus: FavoriteStatus.ready,
+          isFavorite: isFavorite,
+          favoriteErrorMessage: () => null,
+        ),
+      );
+    } on ProblemDetails catch (problem) {
+      emit(
+        state.copyWith(
+          favoriteStatus: FavoriteStatus.failure,
+          favoriteErrorMessage: () => problem.userMessage,
+        ),
+      );
+    } catch (_) {
+      emit(
+        state.copyWith(
+          favoriteStatus: FavoriteStatus.failure,
+          favoriteErrorMessage: () =>
+              'No se pudo consultar el estado de favoritos.',
+        ),
+      );
+    }
+  }
+
+  Future<void> _onFavoriteToggleRequested(
+    FavoriteToggleRequested event,
+    Emitter<ProductDetailState> emit,
+  ) async {
+    final favorites = favoritesRepository;
+    if (favorites == null ||
+        state.favoriteStatus == FavoriteStatus.loading ||
+        state.favoriteStatus == FavoriteStatus.saving) {
+      return;
+    }
+    final wasFavorite = state.isFavorite;
+    emit(state.copyWith(favoriteStatus: FavoriteStatus.saving));
+    try {
+      if (wasFavorite) {
+        await favorites.removeFavorite(event.productId);
+      } else {
+        await favorites.addFavorite(event.productId);
+      }
+      emit(
+        state.copyWith(
+          favoriteStatus: FavoriteStatus.ready,
+          isFavorite: !wasFavorite,
+          favoriteErrorMessage: () => null,
+        ),
+      );
+    } on ProblemDetails catch (problem) {
+      emit(
+        state.copyWith(
+          favoriteStatus: FavoriteStatus.failure,
+          favoriteErrorMessage: () => problem.userMessage,
+        ),
+      );
+    } catch (_) {
+      emit(
+        state.copyWith(
+          favoriteStatus: FavoriteStatus.failure,
+          favoriteErrorMessage: () => 'No se pudo guardar el favorito.',
+        ),
+      );
+    }
   }
 }
