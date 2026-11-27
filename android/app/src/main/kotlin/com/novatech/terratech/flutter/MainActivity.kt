@@ -1,4 +1,4 @@
-package com.example.terratech_mobile
+package com.novatech.terratech.flutter
 
 import io.flutter.embedding.android.FlutterActivity
 
